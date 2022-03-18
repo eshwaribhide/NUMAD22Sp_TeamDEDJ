@@ -27,10 +27,9 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String SERVER_KEY="key=AAAAP4z9QU0:APA91bECheSrt__KSX5dPa-DfGEfb_fWzgi3_E38lvWsyyHenK9F05Uqfo4bjPXhjKjQCXBt5CgtvpC09PQ4c4oZDaHC8ZLHRTBXveiLzQQ5YWDFg9t3Qfod4AKGVMccnQTzxMaQhFWV";
 
-    // This is the client registration token
-    private static String CLIENT_REGISTRATION_TOKEN;
+    // For testing purposes
+    private static String CLIENT_REGISTRATION_TOKEN="fCcDoyEjRrGQCrlNj-jCqM:APA91bFMHTOLwz8Bjr585DR65iMaK8p3pjdeKaRdlxJBvgyaOHdQSPhpkcKG27msaTtj1ysW6f64fDXqxRY_qHJiE-qyM_IdTuAIqexmDHpCLEDpGRIQEmXoQna1rwtpk5b3F7pDCOiD";
 
-    // Test your msg: https://console.firebase.google.com/project/<your-project-name>/notification/compose
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +41,12 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 Toast toast = Toast.makeText(StickerMessagingActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
                 toast.show();
             } else {
-                if (CLIENT_REGISTRATION_TOKEN == null) {
-                    CLIENT_REGISTRATION_TOKEN = task.getResult();
-                }
-                Log.e("CLIENT_REGISTRATION_TOKEN", CLIENT_REGISTRATION_TOKEN);
-                Toast toast = Toast.makeText(StickerMessagingActivity.this, "CLIENT_REGISTRATION_TOKEN EXISTS", Toast.LENGTH_SHORT);
-                toast.show();
+//                if (CLIENT_REGISTRATION_TOKEN == null) {
+//                    CLIENT_REGISTRATION_TOKEN = task.getResult();
+//                }
+                Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
+//                Toast toast = Toast.makeText(StickerMessagingActivity.this, "CLIENT_REGISTRATION_TOKEN EXISTS", Toast.LENGTH_SHORT);
+//                toast.show();
             }
         });
     }
@@ -63,13 +62,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
         JSONObject jNotification = new JSONObject();
         JSONObject jdata = new JSONObject();
         try {
-            jNotification.put("title", "Message Title from 'SEND MESSAGE TO CLIENT BUTTON'");
-            jNotification.put("body", "Message body from 'SEND MESSAGE TO CLIENT BUTTON'");
+            jNotification.put("title", "Test");
+            jNotification.put("body", "Test Text");
             jNotification.put("sound", "default");
             jNotification.put("badge", "1");
 
-            jdata.put("title", "data title from 'SEND MESSAGE TO CLIENT BUTTON'");
-            jdata.put("content", "data content from 'SEND MESSAGE TO CLIENT BUTTON'");
+            jdata.put("title", "data test title");
+            jdata.put("content", "data test content");
 
             jPayload.put("to", targetToken);
 
@@ -109,27 +108,5 @@ public class StickerMessagingActivity extends AppCompatActivity {
         handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
     }
 
-    /* Dive deep into https://medium.com/@selvaganesh93/firebase-cloud-messaging-important-rest-apis-be79260022b5
-     */
-    public static String fcmHttpConnection(String serverToken, JSONObject jsonObject) {
-        try {
-            URL url = new URL("https://fcm.googleapis.com/fcm/send");
-            HttpURLConnection req = (HttpURLConnection) url.openConnection();
-            req.setRequestMethod("POST");
-            req.setRequestProperty("Content-Type", "application/json");
-            req.setRequestProperty("Authorization", serverToken);
-            req.setDoOutput(true);
-
-            OutputStream outputStream = req.getOutputStream();
-            outputStream.write(jsonObject.toString().getBytes());
-            outputStream.close();
-
-            Scanner s = new Scanner(req.getInputStream()).useDelimiter("\\A");
-            return s.hasNext() ? s.next() : "";
-        } catch (IOException e) {
-            return "NULL";
-        }
-
-    }
     
 }

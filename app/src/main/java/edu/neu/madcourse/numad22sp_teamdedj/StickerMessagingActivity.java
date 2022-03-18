@@ -62,10 +62,10 @@ public class StickerMessagingActivity extends AppCompatActivity {
         JSONObject jNotification = new JSONObject();
         JSONObject jdata = new JSONObject();
         try {
-            jNotification.put("title", "Test");
+            jNotification.put("title", "Sticker Received");
             jNotification.put("body", "Test Text");
-            jNotification.put("sound", "default");
             jNotification.put("badge", "1");
+
 
             jdata.put("title", "data test title");
             jdata.put("content", "data test content");

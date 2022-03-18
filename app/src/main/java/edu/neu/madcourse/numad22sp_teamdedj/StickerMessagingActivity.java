@@ -212,13 +212,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());
             } else {
-                    Log.d("Stickers sent", (String) task.getResult().child("stickersSent").getValue());
+                    Log.d("Stickers sent", String.valueOf(task.getResult().child("stickersSent").getValue()));
                     for (DataSnapshot dschild : task.getResult().getChildren()) {
                         if(dschild.hasChildren()) {
                             // It's a Sticker Node, need to parse the data
-                            Log.d("Sticker path", (String) dschild.child("stickerPath").getValue());
-                            Log.d("Sticker sender", (String) dschild.child("senderName").getValue());
-                            Log.d("Sticker time", (String) dschild.child("timeSent").getValue());
+                            Log.d("Sticker path", String.valueOf(dschild.child("stickerPath").getValue()));
+                            Log.d("Sticker sender", String.valueOf(dschild.child("senderName").getValue()));
+                            Log.d("Sticker time", String.valueOf(dschild.child("timeSent").getValue()));
                         }
                     }
                 }

@@ -7,13 +7,14 @@ public class User {
     public String clientRegistrationToken;
     // needed for history
     public Integer stickersSent;
-    // Will map username:Sticker for history
-    public HashMap<String,Sticker> stickersReceived;
+
+    public User() {
+        // Default constructor required for calls to DataSnapshot.getValue(User.class)
+    }
 
     public User(String username, String clientRegistrationToken) {
         this.username = username;
         this.clientRegistrationToken = clientRegistrationToken;
         this.stickersSent = 0;
-        this.stickersReceived = new HashMap<>();
     }
 }

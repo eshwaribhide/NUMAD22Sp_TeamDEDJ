@@ -1,5 +1,7 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,8 +17,14 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -57,6 +65,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             } else {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
+
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
                 alertDialogBuilder.setTitle("Login");
 
@@ -72,10 +81,12 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 alertDialogBuilder.setView(layout);
                 alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
                     String username = editUsername.getText().toString();
-                    // Value of task.getResult() is the client registration token
-                    mDatabase.child("users").child(username).setValue(new User(username, task.getResult()));
-                    Log.e(TAG, "CREATED USER");
                     currentUser=username;
+                    // Value of task.getResult() is the client registration token
+                    // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
+                    mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                    Log.e(TAG, "CREATED USER");
+
                 });
                 alertDialogBuilder.setNegativeButton("Cancel", (dialog, whichButton) -> {
                 });
@@ -88,14 +99,19 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     }
 
+
+
     public void sendStickerMessage(View view) {
-        Task t1 = mDatabase.child("users").child("to-user").child(date()).setValue(new Sticker("R.drawable.presents", currentUser, date()));
-
-
-        //new Thread(() -> sendStickerMessage(CLIENT_REGISTRATION_TOKEN)).start();
+        // send the message
+        new Thread(() -> sendStickerMessage(CLIENT_REGISTRATION_TOKEN)).start();
+        // update number of stickers sent by this user
+        StickerMessagingActivity.this.onUpdateStickersSent(mDatabase, currentUser);
     }
 
     private void sendStickerMessage(String targetToken) {
+        //need a textbox for whom to send to, for now just hardcode to user2
+        // maybe add a dropdown list of all the users in the database to whom can the user can send
+        mDatabase.child("users").child("user2").child(date()).setValue(new Sticker("R.drawable.presents", currentUser, date()));
 
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
@@ -109,6 +125,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
 
             jdata.put("title", "Sticker");
+            //hardcoded for now
             jdata.put("content", "R.drawable.presents");
 
             jPayload.put("to", targetToken);
@@ -140,8 +157,44 @@ public class StickerMessagingActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(TAG, "IO Exception in sending message");
         }
+
+
+
         postToastMessage("Status from Server: " + resp, getApplicationContext());
 
+    }
+
+    private void onUpdateStickersSent(DatabaseReference postRef, String user) {
+        Log.e(TAG, "In onupdatestickerssent");
+        postRef
+                .child("users")
+                .child(user)
+                .runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+
+                        User user = mutableData.getValue(User.class);
+                        if (user == null) {
+                            return Transaction.success(mutableData);
+                        }
+
+                        user.stickersSent = user.stickersSent + 1;
+
+                        mutableData.setValue(user);
+
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b,
+                                           DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onUpdateStickersSent:" + databaseError);
+                        if (databaseError != null) {
+                            Toast.makeText(getApplicationContext()
+                                    , "Database Error: " + databaseError, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     public static void postToastMessage(final String message, final Context context){

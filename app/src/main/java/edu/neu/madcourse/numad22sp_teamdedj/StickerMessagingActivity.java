@@ -23,6 +23,7 @@ import java.util.Scanner;
 
 
 public class StickerMessagingActivity extends AppCompatActivity {
+
     private static final String TAG = "StickerMessagingActivity";
 
     private static final String SERVER_KEY="key=AAAAP4z9QU0:APA91bECheSrt__KSX5dPa-DfGEfb_fWzgi3_E38lvWsyyHenK9F05Uqfo4bjPXhjKjQCXBt5CgtvpC09PQ4c4oZDaHC8ZLHRTBXveiLzQQ5YWDFg9t3Qfod4AKGVMccnQTzxMaQhFWV";
@@ -63,12 +64,14 @@ public class StickerMessagingActivity extends AppCompatActivity {
         JSONObject jdata = new JSONObject();
         try {
             jNotification.put("title", "Sticker Received");
-            jNotification.put("body", "Test Text");
+            jNotification.put("body", "View Sticker");
             jNotification.put("badge", "1");
+            // Just a temporary image for now
+            jNotification.put("image", "https://i.imgur.com/Or7eeA9.jpg");
 
 
-            jdata.put("title", "data test title");
-            jdata.put("content", "data test content");
+            jdata.put("title", "Sticker");
+            jdata.put("content", "R.drawable.presents");
 
             jPayload.put("to", targetToken);
 

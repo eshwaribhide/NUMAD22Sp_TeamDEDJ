@@ -19,4 +19,5 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, StickerMessagingActivity.class);
         startActivity(intent);
     }
+
 }

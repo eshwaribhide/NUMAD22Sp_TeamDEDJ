@@ -14,9 +14,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    // Details are in 'fcm' package
     public void stickerMessagingActivityOnClick(View view) {
         Intent intent = new Intent(this, StickerMessagingActivity.class);
         startActivity(intent);
     }
+
 }

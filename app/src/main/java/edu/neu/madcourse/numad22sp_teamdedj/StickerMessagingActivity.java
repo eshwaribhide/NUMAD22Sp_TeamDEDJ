@@ -1,15 +1,22 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -19,12 +26,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";
+
+    private DatabaseReference mDatabase;
+
+    private String currentUser;
 
     private static final String SERVER_KEY="key=AAAAP4z9QU0:APA91bECheSrt__KSX5dPa-DfGEfb_fWzgi3_E38lvWsyyHenK9F05Uqfo4bjPXhjKjQCXBt5CgtvpC09PQ4c4oZDaHC8ZLHRTBXveiLzQQ5YWDFg9t3Qfod4AKGVMccnQTzxMaQhFWV";
 
@@ -42,19 +55,44 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 Toast toast = Toast.makeText(StickerMessagingActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
                 toast.show();
             } else {
-//                if (CLIENT_REGISTRATION_TOKEN == null) {
-//                    CLIENT_REGISTRATION_TOKEN = task.getResult();
-//                }
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
-//                Toast toast = Toast.makeText(StickerMessagingActivity.this, "CLIENT_REGISTRATION_TOKEN EXISTS", Toast.LENGTH_SHORT);
-//                toast.show();
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                alertDialogBuilder.setTitle("Login");
+
+                LinearLayout layout = new LinearLayout(this);
+                layout.setOrientation(LinearLayout.VERTICAL);
+
+                final EditText editUsername = new EditText(this);
+                editUsername.setHint("Enter Username");
+                layout.addView(editUsername);
+
+                editUsername.setTextColor(Color.parseColor("#9C27B0"));
+
+                alertDialogBuilder.setView(layout);
+                alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
+                    String username = editUsername.getText().toString();
+                    // Value of task.getResult() is the client registration token
+                    mDatabase.child("users").child(username).setValue(new User(username, task.getResult()));
+                    Log.e(TAG, "CREATED USER");
+                    currentUser=username;
+                });
+                alertDialogBuilder.setNegativeButton("Cancel", (dialog, whichButton) -> {
+                });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                alertDialog.show();
             }
         });
+
     }
 
     public void sendStickerMessage(View view) {
+        Task t1 = mDatabase.child("users").child("to-user").child(date()).setValue(new Sticker("R.drawable.presents", currentUser, date()));
 
-        new Thread(() -> sendStickerMessage(CLIENT_REGISTRATION_TOKEN)).start();
+
+        //new Thread(() -> sendStickerMessage(CLIENT_REGISTRATION_TOKEN)).start();
     }
 
     private void sendStickerMessage(String targetToken) {
@@ -109,6 +147,12 @@ public class StickerMessagingActivity extends AppCompatActivity {
     public static void postToastMessage(final String message, final Context context){
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
+    }
+
+    public static String date() {
+        Date dNow = new Date();
+
+        return dNow.toString();
     }
 
     

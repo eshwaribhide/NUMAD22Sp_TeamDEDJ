@@ -1,7 +1,5 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,15 +14,12 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
-import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -34,11 +29,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
-
+// Current issues
+// 1. user should only be created if does not exist, right now gets overwritten, perhaps add some ChildEventListeners
+// 2. need ability to choose user whom to send to (either type username, or
+// a dropdown of all the current users in the database and then select)
+// 3. need to add more stickers
+// 4. need to add on click functionality to a sticker to make tapping on it the way to send
+// 5. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
+// 5. then everything needs to be designed properly (e.g. if we have multiple stickers, maybe a slideshow type thing? Because we can’t tap on the sticker since tapping sends it. Or just have like 2 stickers or something and then lay them out.)
+// 6. foreground notifications do not work and also banner notification does not work for some reason
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";
@@ -66,6 +68,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
 
+                /////////////////This dialog is for login/////////////////
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
                 alertDialogBuilder.setTitle("Login");
 
@@ -94,12 +97,11 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 AlertDialog alertDialog = alertDialogBuilder.create();
 
                 alertDialog.show();
+
             }
         });
 
     }
-
-
 
     public void sendStickerMessage(View view) {
         // send the message
@@ -109,9 +111,9 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     private void sendStickerMessage(String targetToken) {
-        //need a textbox for whom to send to, for now just hardcode to user2
-        // maybe add a dropdown list of all the users in the database to whom can the user can send
-        mDatabase.child("users").child("user2").child(date()).setValue(new Sticker("R.drawable.presents", currentUser, date()));
+        // for now just hardcoded destination user to user2
+        // but once it is dynamic, then will need to read from db and get the client registration token for the destination user
+        mDatabase.child("users").child("user2").child(new Date().toString()).setValue(new Sticker("R.drawable.presents", currentUser, new Date().toString()));
 
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
@@ -120,12 +122,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jNotification.put("title", "Sticker Received");
             jNotification.put("body", "View Sticker");
             jNotification.put("badge", "1");
-            // Just a temporary image for now
+            // Just a temporary image for now just to fulfill requirement of "not only text image"
             jNotification.put("image", "https://i.imgur.com/Or7eeA9.jpg");
 
 
             jdata.put("title", "Sticker");
-            //hardcoded for now
+            // hardcoded for now, but actual content will be image tapped on by user
+            // will have to be handled in on click for the image
             jdata.put("content", "R.drawable.presents");
 
             jPayload.put("to", targetToken);
@@ -157,8 +160,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(TAG, "IO Exception in sending message");
         }
-
-
 
         postToastMessage("Status from Server: " + resp, getApplicationContext());
 
@@ -197,16 +198,31 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 });
     }
 
+    // Just called at the beginning once message is finished being sent. Can be deleted later.
     public static void postToastMessage(final String message, final Context context){
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
     }
 
-    public static String date() {
-        Date dNow = new Date();
-
-        return dNow.toString();
+    public void historyButtonOnClick(View view) {
+        // actually should just create an intent and go to new activity
+        // then in the new activity make the db reference same and then get info
+        // remove hardcoded reference to user2, change instead to current user
+        mDatabase.child("users").child("user2").get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            } else {
+                    Log.d("Stickers sent", (String) task.getResult().child("stickersSent").getValue());
+                    for (DataSnapshot dschild : task.getResult().getChildren()) {
+                        if(dschild.hasChildren()) {
+                            // It's a Sticker Node, need to parse the data
+                            Log.d("Sticker path", (String) dschild.child("stickerPath").getValue());
+                            Log.d("Sticker sender", (String) dschild.child("senderName").getValue());
+                            Log.d("Sticker time", (String) dschild.child("timeSent").getValue());
+                        }
+                    }
+                }
+        });
     }
 
-    
 }

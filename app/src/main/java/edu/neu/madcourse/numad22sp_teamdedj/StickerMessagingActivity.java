@@ -11,8 +11,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -30,16 +32,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
 // Current issues
 // 1. user should only be created if does not exist, right now gets overwritten, perhaps add some ChildEventListeners
-// 2. need better ability to choose user whom to send to-a dropdown of all the current users in the database and then select)
-// or at least validation that the user exists
-// 3. need to add more stickers
-// 4. need to add on click functionality to a sticker to make tapping on it the way to send
-// 5. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
+// 2. need to add more stickers
+// 3. need to add on click functionality to a sticker to make tapping on it the way to send
+// 4. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
 // 5. then everything needs to be designed properly (e.g. if we have multiple stickers, maybe a slideshow type thing? Because we can’t tap on the sticker since tapping sends it. Or just have like 2 stickers or something and then lay them out.)
 // 6. foreground notifications do not work and also banner notification does not work for some reason
 public class StickerMessagingActivity extends AppCompatActivity {
@@ -80,12 +81,29 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
                 // mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
                 // Log.e(TAG, "CREATED USER");
+
+                Spinner destUsersDropdown = findViewById(R.id.destUsers);
+
+                mDatabase.child("users").get().addOnCompleteListener(t -> {
+                    if (!t.isSuccessful()) {
+                        Log.e("firebase", "Error getting data", task.getException());
+                    } else {
+                        ArrayList<String> destUsers = new ArrayList<>();
+                        for (DataSnapshot dschild : t.getResult().getChildren()) {
+                            destUsers.add(String.valueOf(dschild.getKey()));
+                        }
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, destUsers);
+                        destUsersDropdown.setAdapter(adapter);
+                    }
+                });
             }
         });
     }
 
     public void sendStickerMessage(View view) {
-        String destUser = ((EditText)findViewById(R.id.destUser)).getText().toString();
+        Spinner destUsersDropdown = findViewById(R.id.destUsers);
+        String destUser = destUsersDropdown.getSelectedItem().toString();
+        Log.e(TAG, destUser);
         mDatabase.child("users").child(destUser).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());

@@ -53,8 +53,11 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String SERVER_KEY="key=AAAAP4z9QU0:APA91bECheSrt__KSX5dPa-DfGEfb_fWzgi3_E38lvWsyyHenK9F05Uqfo4bjPXhjKjQCXBt5CgtvpC09PQ4c4oZDaHC8ZLHRTBXveiLzQQ5YWDFg9t3Qfod4AKGVMccnQTzxMaQhFWV";
 
-    // For testing purposes
-    private static String CLIENT_REGISTRATION_TOKEN="fCcDoyEjRrGQCrlNj-jCqM:APA91bFMHTOLwz8Bjr585DR65iMaK8p3pjdeKaRdlxJBvgyaOHdQSPhpkcKG27msaTtj1ysW6f64fDXqxRY_qHJiE-qyM_IdTuAIqexmDHpCLEDpGRIQEmXoQna1rwtpk5b3F7pDCOiD";
+    // For testing purposes, user 2's value
+    //private static String CLIENT_REGISTRATION_TOKEN="fCcDoyEjRrGQCrlNj-jCqM:APA91bFMHTOLwz8Bjr585DR65iMaK8p3pjdeKaRdlxJBvgyaOHdQSPhpkcKG27msaTtj1ysW6f64fDXqxRY_qHJiE-qyM_IdTuAIqexmDHpCLEDpGRIQEmXoQna1rwtpk5b3F7pDCOiD";
+
+    // For testing purposes, user 1's value
+    private static String CLIENT_REGISTRATION_TOKEN="f9BCIWKoQT2TAoGlb_Evtk:APA91bFT6XMVzCXiLyNd5XRzCd8fXtz37t6bVXnSCdgC7Bjxl80ayLLUWwMcMDn5_OI9Yh38pOhDbE9jEHRBBqDFKXgFIvdQxeyft2z77EqdTcbV8VHqIyc_X4hsNtVEApCvXsUiAsF6";
 
 
     @Override
@@ -70,35 +73,37 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
 
-                /////////////////This dialog is for login/////////////////
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                alertDialogBuilder.setTitle("Login");
-
-                LinearLayout layout = new LinearLayout(this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-
-                final EditText editUsername = new EditText(this);
-                editUsername.setHint("Enter Username");
-                layout.addView(editUsername);
-
-                editUsername.setTextColor(Color.parseColor("#9C27B0"));
-
-                alertDialogBuilder.setView(layout);
-                alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
-                    String username = editUsername.getText().toString();
-                    currentUser=username;
-                    // Value of task.getResult() is the client registration token
-                    // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
-                    mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
-                    Log.e(TAG, "CREATED USER");
-
-                });
-                alertDialogBuilder.setNegativeButton("Cancel", (dialog, whichButton) -> {
-                });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                alertDialog.show();
+//                /////////////////This dialog is for login/////////////////
+//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+//                alertDialogBuilder.setTitle("Login");
+//
+//                LinearLayout layout = new LinearLayout(this);
+//                layout.setOrientation(LinearLayout.VERTICAL);
+//
+//                final EditText editUsername = new EditText(this);
+//                editUsername.setHint("Enter Username");
+//                layout.addView(editUsername);
+//
+//                editUsername.setTextColor(Color.parseColor("#9C27B0"));
+//
+//                alertDialogBuilder.setView(layout);
+//                alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
+//                    String username = editUsername.getText().toString();
+                     //FOR TESTING
+                     currentUser="user2";
+//                    // Value of task.getResult() is the client registration token
+//                    // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
+                    // FOR TESTING
+        //            mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+//                    Log.e(TAG, "CREATED USER");
+//
+//                });
+//                alertDialogBuilder.setNegativeButton("Cancel", (dialog, whichButton) -> {
+//                });
+//
+//                AlertDialog alertDialog = alertDialogBuilder.create();
+//
+//                alertDialog.show();
 
             }
         });
@@ -109,13 +114,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
         // send the message
         new Thread(() -> sendStickerMessage(CLIENT_REGISTRATION_TOKEN)).start();
         // update number of stickers sent by this user
-        StickerMessagingActivity.this.onUpdateStickersSent(mDatabase, currentUser);
+        StickerMessagingActivity.this.updateStickersSent();
     }
 
     private void sendStickerMessage(String targetToken) {
         // for now just hardcoded destination user to user2
         // but once it is dynamic, then will need to read from db and get the client registration token for the destination user
-        mDatabase.child("users").child("user2").child(new Date().toString()).setValue(new Sticker("R.drawable.presents", currentUser, new Date().toString()));
+        mDatabase.child("users").child("user1").child(new Date().toString()).setValue(new Sticker(R.drawable.presents, currentUser, new Date().toString()));
 
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
@@ -167,37 +172,16 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     }
 
-    private void onUpdateStickersSent(DatabaseReference postRef, String user) {
-        Log.e(TAG, "In onupdatestickerssent");
-        postRef
-                .child("users")
-                .child(user)
-                .runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-
-                        User user = mutableData.getValue(User.class);
-                        if (user == null) {
-                            return Transaction.success(mutableData);
-                        }
-
-                        user.stickersSent = user.stickersSent + 1;
-
-                        mutableData.setValue(user);
-
-                        return Transaction.success(mutableData);
-                    }
-
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b,
-                                           DataSnapshot dataSnapshot) {
-                        Log.d(TAG, "onUpdateStickersSent:" + databaseError);
-                        if (databaseError != null) {
-                            Toast.makeText(getApplicationContext()
-                                    , "Database Error: " + databaseError, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+    private void updateStickersSent() {
+        mDatabase.child("users").child(currentUser).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            } else {
+                int stickersSent = Integer.parseInt(String.valueOf(task.getResult().child("stickersSent").getValue()));
+                int newStickersSent = stickersSent + 1;
+                mDatabase.child("users").child(currentUser).child("stickersSent").setValue(newStickersSent);
+            }
+        });
     }
 
     // Just called at the beginning once message is finished being sent. Can be deleted later.
@@ -208,11 +192,11 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     public void historyButtonOnClick(View view) {
         Intent intent = new Intent(this, HistoryActivity.class);
+        // Enclose the currentUser information as a parameter
         Bundle b = new Bundle();
         b.putString("currentUser", currentUser);
         intent.putExtras(b);
         startActivity(intent);
-        //finish();
     }
 
 }

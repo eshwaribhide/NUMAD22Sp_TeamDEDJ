@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,6 +42,7 @@ import java.util.Scanner;
 // 5. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
 // 5. then everything needs to be designed properly (e.g. if we have multiple stickers, maybe a slideshow type thing? Because we can’t tap on the sticker since tapping sends it. Or just have like 2 stickers or something and then lay them out.)
 // 6. foreground notifications do not work and also banner notification does not work for some reason
+// 7. maybe have a login popup when clicking launch button instead of on create
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";
@@ -205,24 +207,12 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     public void historyButtonOnClick(View view) {
-        // actually should just create an intent and go to new activity
-        // then in the new activity make the db reference same and then get info
-        // remove hardcoded reference to user2, change instead to current user
-        mDatabase.child("users").child("user2").get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e("firebase", "Error getting data", task.getException());
-            } else {
-                    Log.d("Stickers sent", String.valueOf(task.getResult().child("stickersSent").getValue()));
-                    for (DataSnapshot dschild : task.getResult().getChildren()) {
-                        if(dschild.hasChildren()) {
-                            // It's a Sticker Node, need to parse the data
-                            Log.d("Sticker path", String.valueOf(dschild.child("stickerPath").getValue()));
-                            Log.d("Sticker sender", String.valueOf(dschild.child("senderName").getValue()));
-                            Log.d("Sticker time", String.valueOf(dschild.child("timeSent").getValue()));
-                        }
-                    }
-                }
-        });
+        Intent intent = new Intent(this, HistoryActivity.class);
+        Bundle b = new Bundle();
+        b.putString("currentUser", currentUser);
+        intent.putExtras(b);
+        startActivity(intent);
+        //finish();
     }
 
 }

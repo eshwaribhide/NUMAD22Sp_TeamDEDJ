@@ -4,14 +4,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -29,16 +32,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
 // Current issues
 // 1. user should only be created if does not exist, right now gets overwritten, perhaps add some ChildEventListeners
-// 2. need ability to choose user whom to send to (either type username, or
-// a dropdown of all the current users in the database and then select)
-// 3. need to add more stickers
-// 4. need to add on click functionality to a sticker to make tapping on it the way to send
-// 5. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
+// 2. need to add more stickers
+// 3. need to add on click functionality to a sticker to make tapping on it the way to send
+// 4. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
 // 5. then everything needs to be designed properly (e.g. if we have multiple stickers, maybe a slideshow type thing? Because we can’t tap on the sticker since tapping sends it. Or just have like 2 stickers or something and then lay them out.)
 // 6. foreground notifications do not work and also banner notification does not work for some reason
 public class StickerMessagingActivity extends AppCompatActivity {
@@ -51,8 +53,11 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String SERVER_KEY="key=AAAAP4z9QU0:APA91bECheSrt__KSX5dPa-DfGEfb_fWzgi3_E38lvWsyyHenK9F05Uqfo4bjPXhjKjQCXBt5CgtvpC09PQ4c4oZDaHC8ZLHRTBXveiLzQQ5YWDFg9t3Qfod4AKGVMccnQTzxMaQhFWV";
 
-    // For testing purposes
-    private static String CLIENT_REGISTRATION_TOKEN="fCcDoyEjRrGQCrlNj-jCqM:APA91bFMHTOLwz8Bjr585DR65iMaK8p3pjdeKaRdlxJBvgyaOHdQSPhpkcKG27msaTtj1ysW6f64fDXqxRY_qHJiE-qyM_IdTuAIqexmDHpCLEDpGRIQEmXoQna1rwtpk5b3F7pDCOiD";
+    // For testing purposes, user 2's value
+    //private static String CLIENT_REGISTRATION_TOKEN="fCcDoyEjRrGQCrlNj-jCqM:APA91bFMHTOLwz8Bjr585DR65iMaK8p3pjdeKaRdlxJBvgyaOHdQSPhpkcKG27msaTtj1ysW6f64fDXqxRY_qHJiE-qyM_IdTuAIqexmDHpCLEDpGRIQEmXoQna1rwtpk5b3F7pDCOiD";
+
+    // For testing purposes, user 1's value
+    //private static String CLIENT_REGISTRATION_TOKEN="f9BCIWKoQT2TAoGlb_Evtk:APA91bFT6XMVzCXiLyNd5XRzCd8fXtz37t6bVXnSCdgC7Bjxl80ayLLUWwMcMDn5_OI9Yh38pOhDbE9jEHRBBqDFKXgFIvdQxeyft2z77EqdTcbV8VHqIyc_X4hsNtVEApCvXsUiAsF6";
 
 
     @Override
@@ -67,54 +72,57 @@ public class StickerMessagingActivity extends AppCompatActivity {
             } else {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
+                Bundle b = getIntent().getExtras();
+                if (b != null) {
+                    currentUser = b.getString("currentUser");
+                }
+                 //FOR TESTING
+                 currentUser="user2";
+                // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
+                // mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                // Log.e(TAG, "CREATED USER");
 
-                /////////////////This dialog is for login/////////////////
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                alertDialogBuilder.setTitle("Login");
+                Spinner destUsersDropdown = findViewById(R.id.destUsers);
 
-                LinearLayout layout = new LinearLayout(this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-
-                final EditText editUsername = new EditText(this);
-                editUsername.setHint("Enter Username");
-                layout.addView(editUsername);
-
-                editUsername.setTextColor(Color.parseColor("#9C27B0"));
-
-                alertDialogBuilder.setView(layout);
-                alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
-                    String username = editUsername.getText().toString();
-                    currentUser=username;
-                    // Value of task.getResult() is the client registration token
-                    // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
-                    mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
-                    Log.e(TAG, "CREATED USER");
-
+                mDatabase.child("users").get().addOnCompleteListener(t -> {
+                    if (!t.isSuccessful()) {
+                        Log.e("firebase", "Error getting data", task.getException());
+                    } else {
+                        ArrayList<String> destUsers = new ArrayList<>();
+                        for (DataSnapshot dschild : t.getResult().getChildren()) {
+                            destUsers.add(String.valueOf(dschild.getKey()));
+                        }
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, destUsers);
+                        destUsersDropdown.setAdapter(adapter);
+                    }
                 });
-                alertDialogBuilder.setNegativeButton("Cancel", (dialog, whichButton) -> {
-                });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                alertDialog.show();
-
             }
         });
-
     }
 
     public void sendStickerMessage(View view) {
-        // send the message
-        new Thread(() -> sendStickerMessage(CLIENT_REGISTRATION_TOKEN)).start();
-        // update number of stickers sent by this user
-        StickerMessagingActivity.this.onUpdateStickersSent(mDatabase, currentUser);
+        Spinner destUsersDropdown = findViewById(R.id.destUsers);
+        String destUser = destUsersDropdown.getSelectedItem().toString();
+        Log.e(TAG, destUser);
+        mDatabase.child("users").child(destUser).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            } else {
+                String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
+                // send the message
+                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken)).start();
+                // update number of stickers sent by this user
+                StickerMessagingActivity.this.updateStickersSent();
+            }
+        });
     }
 
-    private void sendStickerMessage(String targetToken) {
-        // for now just hardcoded destination user to user2
-        // but once it is dynamic, then will need to read from db and get the client registration token for the destination user
-        mDatabase.child("users").child("user2").child(new Date().toString()).setValue(new Sticker("R.drawable.presents", currentUser, new Date().toString()));
+    private void sendStickerMessage(String destUser, String targetToken) {
+        // Need to replace static image with chosen image
+        // This will write to the database in order to have history
+        mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(R.drawable.presents, currentUser, new Date().toString()));
 
+        // This has to do with notifications
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
         JSONObject jdata = new JSONObject();
@@ -129,7 +137,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jdata.put("title", "Sticker");
             // hardcoded for now, but actual content will be image tapped on by user
             // will have to be handled in on click for the image
-            jdata.put("content", "R.drawable.presents");
+            jdata.put("content", R.drawable.presents);
 
             jPayload.put("to", targetToken);
 
@@ -161,68 +169,35 @@ public class StickerMessagingActivity extends AppCompatActivity {
             Log.e(TAG, "IO Exception in sending message");
         }
 
-        postToastMessage("Status from Server: " + resp, getApplicationContext());
+        //postToastMessage("Status from Server: " + resp, getApplicationContext());
 
     }
 
-    private void onUpdateStickersSent(DatabaseReference postRef, String user) {
-        Log.e(TAG, "In onupdatestickerssent");
-        postRef
-                .child("users")
-                .child(user)
-                .runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-
-                        User user = mutableData.getValue(User.class);
-                        if (user == null) {
-                            return Transaction.success(mutableData);
-                        }
-
-                        user.stickersSent = user.stickersSent + 1;
-
-                        mutableData.setValue(user);
-
-                        return Transaction.success(mutableData);
-                    }
-
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b,
-                                           DataSnapshot dataSnapshot) {
-                        Log.d(TAG, "onUpdateStickersSent:" + databaseError);
-                        if (databaseError != null) {
-                            Toast.makeText(getApplicationContext()
-                                    , "Database Error: " + databaseError, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
-    // Just called at the beginning once message is finished being sent. Can be deleted later.
-    public static void postToastMessage(final String message, final Context context){
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
-    }
-
-    public void historyButtonOnClick(View view) {
-        // actually should just create an intent and go to new activity
-        // then in the new activity make the db reference same and then get info
-        // remove hardcoded reference to user2, change instead to current user
-        mDatabase.child("users").child("user2").get().addOnCompleteListener(task -> {
+    private void updateStickersSent() {
+        mDatabase.child("users").child(currentUser).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());
             } else {
-                    Log.d("Stickers sent", String.valueOf(task.getResult().child("stickersSent").getValue()));
-                    for (DataSnapshot dschild : task.getResult().getChildren()) {
-                        if(dschild.hasChildren()) {
-                            // It's a Sticker Node, need to parse the data
-                            Log.d("Sticker path", String.valueOf(dschild.child("stickerPath").getValue()));
-                            Log.d("Sticker sender", String.valueOf(dschild.child("senderName").getValue()));
-                            Log.d("Sticker time", String.valueOf(dschild.child("timeSent").getValue()));
-                        }
-                    }
-                }
+                int stickersSent = Integer.parseInt(String.valueOf(task.getResult().child("stickersSent").getValue()));
+                int newStickersSent = stickersSent + 1;
+                mDatabase.child("users").child(currentUser).child("stickersSent").setValue(newStickersSent);
+            }
         });
+    }
+
+//    // Just called at the beginning once message is finished being sent. Can be deleted later.
+//    public static void postToastMessage(final String message, final Context context){
+//        Handler handler = new Handler(Looper.getMainLooper());
+//        handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
+//    }
+
+    public void historyButtonOnClick(View view) {
+        Intent intent = new Intent(this, HistoryActivity.class);
+        // Enclose the currentUser information as a parameter
+        Bundle b = new Bundle();
+        b.putString("currentUser", currentUser);
+        intent.putExtras(b);
+        startActivity(intent);
     }
 
 }

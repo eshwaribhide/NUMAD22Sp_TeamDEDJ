@@ -57,7 +57,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
     //private static String CLIENT_REGISTRATION_TOKEN="fCcDoyEjRrGQCrlNj-jCqM:APA91bFMHTOLwz8Bjr585DR65iMaK8p3pjdeKaRdlxJBvgyaOHdQSPhpkcKG27msaTtj1ysW6f64fDXqxRY_qHJiE-qyM_IdTuAIqexmDHpCLEDpGRIQEmXoQna1rwtpk5b3F7pDCOiD";
 
     // For testing purposes, user 1's value
-    private static String CLIENT_REGISTRATION_TOKEN="f9BCIWKoQT2TAoGlb_Evtk:APA91bFT6XMVzCXiLyNd5XRzCd8fXtz37t6bVXnSCdgC7Bjxl80ayLLUWwMcMDn5_OI9Yh38pOhDbE9jEHRBBqDFKXgFIvdQxeyft2z77EqdTcbV8VHqIyc_X4hsNtVEApCvXsUiAsF6";
+    //private static String CLIENT_REGISTRATION_TOKEN="f9BCIWKoQT2TAoGlb_Evtk:APA91bFT6XMVzCXiLyNd5XRzCd8fXtz37t6bVXnSCdgC7Bjxl80ayLLUWwMcMDn5_OI9Yh38pOhDbE9jEHRBBqDFKXgFIvdQxeyft2z77EqdTcbV8VHqIyc_X4hsNtVEApCvXsUiAsF6";
 
 
     @Override
@@ -111,16 +111,23 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     public void sendStickerMessage(View view) {
-        // send the message
-        new Thread(() -> sendStickerMessage(CLIENT_REGISTRATION_TOKEN)).start();
-        // update number of stickers sent by this user
-        StickerMessagingActivity.this.updateStickersSent();
+        String destUser = ((EditText)findViewById(R.id.destUser)).getText().toString();
+        mDatabase.child("users").child(destUser).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            } else {
+                String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
+                // send the message
+                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken)).start();
+                // update number of stickers sent by this user
+                StickerMessagingActivity.this.updateStickersSent();
+            }
+        });
     }
 
-    private void sendStickerMessage(String targetToken) {
-        // for now just hardcoded destination user to user2
-        // but once it is dynamic, then will need to read from db and get the client registration token for the destination user
-        mDatabase.child("users").child("user1").child(new Date().toString()).setValue(new Sticker(R.drawable.presents, currentUser, new Date().toString()));
+    private void sendStickerMessage(String destUser, String targetToken) {
+        // Need to replace static image with chosen iamge
+        mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(R.drawable.presents, currentUser, new Date().toString()));
 
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();

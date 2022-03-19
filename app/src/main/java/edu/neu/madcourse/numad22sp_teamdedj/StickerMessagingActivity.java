@@ -35,14 +35,13 @@ import java.util.Scanner;
 
 // Current issues
 // 1. user should only be created if does not exist, right now gets overwritten, perhaps add some ChildEventListeners
-// 2. need ability to choose user whom to send to (either type username, or
-// a dropdown of all the current users in the database and then select)
+// 2. need better ability to choose user whom to send to-a dropdown of all the current users in the database and then select)
+// or at least validation that the user exists
 // 3. need to add more stickers
 // 4. need to add on click functionality to a sticker to make tapping on it the way to send
 // 5. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
 // 5. then everything needs to be designed properly (e.g. if we have multiple stickers, maybe a slideshow type thing? Because we can’t tap on the sticker since tapping sends it. Or just have like 2 stickers or something and then lay them out.)
 // 6. foreground notifications do not work and also banner notification does not work for some reason
-// 7. maybe have a login popup when clicking launch button instead of on create
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";
@@ -72,42 +71,17 @@ public class StickerMessagingActivity extends AppCompatActivity {
             } else {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
-
-//                /////////////////This dialog is for login/////////////////
-//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-//                alertDialogBuilder.setTitle("Login");
-//
-//                LinearLayout layout = new LinearLayout(this);
-//                layout.setOrientation(LinearLayout.VERTICAL);
-//
-//                final EditText editUsername = new EditText(this);
-//                editUsername.setHint("Enter Username");
-//                layout.addView(editUsername);
-//
-//                editUsername.setTextColor(Color.parseColor("#9C27B0"));
-//
-//                alertDialogBuilder.setView(layout);
-//                alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
-//                    String username = editUsername.getText().toString();
-                     //FOR TESTING
-                     currentUser="user2";
-//                    // Value of task.getResult() is the client registration token
-//                    // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
-                    // FOR TESTING
-        //            mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
-//                    Log.e(TAG, "CREATED USER");
-//
-//                });
-//                alertDialogBuilder.setNegativeButton("Cancel", (dialog, whichButton) -> {
-//                });
-//
-//                AlertDialog alertDialog = alertDialogBuilder.create();
-//
-//                alertDialog.show();
-
+                Bundle b = getIntent().getExtras();
+                if (b != null) {
+                    currentUser = b.getString("currentUser");
+                }
+                 //FOR TESTING
+                 currentUser="user2";
+                // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
+                // mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                // Log.e(TAG, "CREATED USER");
             }
         });
-
     }
 
     public void sendStickerMessage(View view) {
@@ -126,9 +100,11 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     private void sendStickerMessage(String destUser, String targetToken) {
-        // Need to replace static image with chosen iamge
+        // Need to replace static image with chosen image
+        // This will write to the database in order to have history
         mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(R.drawable.presents, currentUser, new Date().toString()));
 
+        // This has to do with notifications
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
         JSONObject jdata = new JSONObject();
@@ -143,7 +119,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jdata.put("title", "Sticker");
             // hardcoded for now, but actual content will be image tapped on by user
             // will have to be handled in on click for the image
-            jdata.put("content", "R.drawable.presents");
+            jdata.put("content", R.drawable.presents);
 
             jPayload.put("to", targetToken);
 
@@ -175,7 +151,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             Log.e(TAG, "IO Exception in sending message");
         }
 
-        postToastMessage("Status from Server: " + resp, getApplicationContext());
+        //postToastMessage("Status from Server: " + resp, getApplicationContext());
 
     }
 
@@ -191,11 +167,11 @@ public class StickerMessagingActivity extends AppCompatActivity {
         });
     }
 
-    // Just called at the beginning once message is finished being sent. Can be deleted later.
-    public static void postToastMessage(final String message, final Context context){
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
-    }
+//    // Just called at the beginning once message is finished being sent. Can be deleted later.
+//    public static void postToastMessage(final String message, final Context context){
+//        Handler handler = new Handler(Looper.getMainLooper());
+//        handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
+//    }
 
     public void historyButtonOnClick(View view) {
         Intent intent = new Intent(this, HistoryActivity.class);

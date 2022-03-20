@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="historyButtonOnClick"
-        android:text="History"
+        android:text="Stickers Received"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -87,5 +87,16 @@
         app:layout_constraintStart_toEndOf="@id/laughSticker"
         app:layout_constraintTop_toBottomOf="@+id/presentSticker"
         app:srcCompat="@drawable/burger_sticker" />
+
+    <Button
+        android:id="@+id/stickersSentButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:onClick="stickersSentButtonOnClick"
+        android:text="Stickers Sent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/historyButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

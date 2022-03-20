@@ -6,11 +6,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void stickerMessagingActivityOnClick(View view) {
+
         /////////////////This dialog is for login/////////////////
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle("Login");
@@ -35,11 +43,17 @@ public class MainActivity extends AppCompatActivity {
         alertDialogBuilder.setView(layout);
         alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
             String username = editUsername.getText().toString();
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                if (!task.isSuccessful()) {
+                    Toast toast = Toast.makeText(this, "Cannot get token", Toast.LENGTH_SHORT);
+                    toast.show();
+                } else {
+                    Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
+                    mDatabase = FirebaseDatabase.getInstance().getReference();
+                    mDatabase.child("currentUser").setValue(username);
+                }});
+
             Intent intent = new Intent(this, StickerMessagingActivity.class);
-            // Enclose the currentUser information as a parameter
-            Bundle b = new Bundle();
-            b.putString("currentUser", username);
-            intent.putExtras(b);
             startActivity(intent);
         });
 

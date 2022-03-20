@@ -52,7 +52,7 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
-        stickersSent = findViewById(R.id.stickersSent);
+        stickersSent = findViewById(R.id.stickersReceivedLbl);
 
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
@@ -65,14 +65,11 @@ public class HistoryActivity extends AppCompatActivity {
                 if (b != null) {
                     currentUser = b.getString("currentUser");
                 }
+                generateRecyclerView();
                 mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t -> {
                     if (!t.isSuccessful()) {
                         Log.e("firebase", "Error getting data", task.getException());
                     } else {
-                        Log.d("Stickers sent", String.valueOf(t.getResult().child("stickersSent").getValue()));
-                        String stickersSentText = "Stickers Sent: " + t.getResult().child("stickersSent").getValue();
-                        stickersSent.setText(stickersSentText);
-                        stickersSent.setTextSize(20);
                         for (DataSnapshot dschild : t.getResult().getChildren()) {
                             if (dschild.hasChildren()) {
                                 // It's a Sticker Node, need to parse the data
@@ -90,7 +87,7 @@ public class HistoryActivity extends AppCompatActivity {
                 });
             }
         });
-        generateRecyclerView();
+
     }
 
         private void addHistoryItemToRecyclerView(Integer stickerID, String senderName, String timeSent) {

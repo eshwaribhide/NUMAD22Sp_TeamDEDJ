@@ -16,21 +16,21 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 
-public class HistoryActivity extends AppCompatActivity {
+public class StickersReceivedActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private String currentUser;
     private TextView stickersSent;
     private RecyclerView recyclerView;
-    private HistoryRecyclerViewAdapter recyclerViewAdapter;
+    private StickersReceivedRecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
-    private ArrayList<HistoryActivity.HistoryItem> historyItems = new ArrayList<>();
+    private ArrayList<StickersReceived> stickersReceived = new ArrayList<>();
 
-    public static class HistoryItem {
+    public static class StickersReceived {
         private final int stickerSource;
         private final String stickerSender;
         private final String stickerTime;
 
-        public HistoryItem(int stickerSource, String stickerSender, String stickerTime) {
+        public StickersReceived(int stickerSource, String stickerSender, String stickerTime) {
             this.stickerSource = stickerSource;
             this.stickerSender = stickerSender;
             this.stickerTime = stickerTime;
@@ -57,7 +57,7 @@ public class HistoryActivity extends AppCompatActivity {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("CANNOT GET TOKEN", "no token");
-                Toast toast = Toast.makeText(HistoryActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(StickersReceivedActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
                 toast.show();
             } else {
                 mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -95,7 +95,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         private void addHistoryItemToRecyclerView(Integer stickerID, String senderName, String timeSent) {
             recyclerViewLayoutManager.smoothScrollToPosition(recyclerView, null, 0);
-            historyItems.add(0, new HistoryActivity.HistoryItem(stickerID, senderName, timeSent));
+            stickersReceived.add(0, new StickersReceived(stickerID, senderName, timeSent));
             recyclerViewAdapter.notifyItemInserted(0);
         }
 
@@ -104,7 +104,7 @@ public class HistoryActivity extends AppCompatActivity {
             recyclerView = findViewById(R.id.recyclerView);
             recyclerView.setHasFixedSize(true);
 
-            recyclerViewAdapter = new HistoryRecyclerViewAdapter(historyItems);
+            recyclerViewAdapter = new StickersReceivedRecyclerViewAdapter(stickersReceived);
 
             recyclerView.setAdapter(recyclerViewAdapter);
             recyclerView.setLayoutManager(recyclerViewLayoutManager);

@@ -1,28 +1,18 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -209,7 +199,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
 //    }
 
     public void historyButtonOnClick(View view) {
-        Intent intent = new Intent(this, HistoryActivity.class);
+        Intent intent = new Intent(this, StickersReceivedActivity.class);
         // Enclose the currentUser information as a parameter
         Bundle b = new Bundle();
         b.putString("currentUser", currentUser);

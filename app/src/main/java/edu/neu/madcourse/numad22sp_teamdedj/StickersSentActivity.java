@@ -46,35 +46,31 @@ public class StickersSentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stickers_sent);
 
-//        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-//            if (!task.isSuccessful()) {
-//                Log.e("CANNOT GET TOKEN", "no token");
-//                Toast toast = Toast.makeText(StickersSentActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
-//                toast.show();
-//            } else {
-//                mDatabase = FirebaseDatabase.getInstance().getReference();
-//                Bundle b = getIntent().getExtras();
-//                if (b != null) {
-//                    currentUser = b.getString("currentUser");
-//                }
-//                mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t -> {
-//                    if (!t.isSuccessful()) {
-//                        Log.e("firebase", "Error getting data", task.getException());
-//                    } else {
-//                        addHistoryItemToRecyclerView(R.drawable.hello, "Sent " + t.getResult().child("helloStickerCount").getValue() + " times");
-//                        addHistoryItemToRecyclerView(R.drawable.presents, "Sent " + t.getResult().child("presentStickerCount").getValue() + " times");
-//                        addHistoryItemToRecyclerView(R.drawable.laugh_sticker, "Sent " + t.getResult().child("laughStickerCount").getValue() + " times");
-//                        addHistoryItemToRecyclerView(R.drawable.burger_sticker, "Sent " + t.getResult().child("burgerStickerCount").getValue() + " times");
-//                    }
-//                });
-//            }
-//        });
-          generateRecyclerView();
-          Log.e("ADDING ITEM", "adding item");
-          addHistoryItemToRecyclerView(R.drawable.hello, "Sent 0 times");
-          addHistoryItemToRecyclerView(R.drawable.presents, "Sent 0 times");
-        Log.e("ADDED ITEM", "adding item");
-//        generateRecyclerView();
+
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("CANNOT GET TOKEN", "no token");
+                Toast toast = Toast.makeText(StickersSentActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
+                toast.show();
+            } else {
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+                Bundle b = getIntent().getExtras();
+                if (b != null) {
+                    currentUser = b.getString("currentUser");
+                }
+                generateRecyclerView();
+                mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t -> {
+                    if (!t.isSuccessful()) {
+                        Log.e("firebase", "Error getting data", task.getException());
+                    } else {
+                        addHistoryItemToRecyclerView(R.drawable.hello, "Sent " + t.getResult().child("helloStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.presents, "Sent " + t.getResult().child("presentStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.laugh_sticker, "Sent " + t.getResult().child("laughStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.burger_sticker, "Sent " + t.getResult().child("burgerStickerCount").getValue() + " times");
+                    }
+                });
+            }
+        });
     }
 
     private void addHistoryItemToRecyclerView(Integer stickerID, String stickerCount) {

@@ -65,6 +65,7 @@ public class HistoryActivity extends AppCompatActivity {
                 if (b != null) {
                     currentUser = b.getString("currentUser");
                 }
+                generateRecyclerView();
                 mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t -> {
                     if (!t.isSuccessful()) {
                         Log.e("firebase", "Error getting data", task.getException());
@@ -86,7 +87,7 @@ public class HistoryActivity extends AppCompatActivity {
                 });
             }
         });
-        generateRecyclerView();
+
     }
 
         private void addHistoryItemToRecyclerView(Integer stickerID, String senderName, String timeSent) {

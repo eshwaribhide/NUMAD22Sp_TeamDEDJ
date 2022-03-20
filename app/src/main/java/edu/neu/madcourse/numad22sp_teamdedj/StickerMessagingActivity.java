@@ -70,7 +70,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 // I assume this is why the history page always shows 8 stickers sent
                  currentUser="user2";
                 // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
-                mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                //mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
                 // Log.e(TAG, "CREATED USER");
 
                 Spinner destUsersDropdown = findViewById(R.id.destUsers);

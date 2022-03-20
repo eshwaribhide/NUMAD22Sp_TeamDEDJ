@@ -104,28 +104,35 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 // get token of the user from the database
                 String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
                 // send the message
-                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, view.getId())).start();
+                int stickerId = view.getId();
+                int sentSticker;
+                String countChildValue;
+                if (stickerId == R.id.helloSticker) {
+                    sentSticker = R.drawable.hello;
+                    countChildValue = "helloStickerCount";
+                } else if (stickerId == R.id.presentSticker) {
+                    sentSticker = R.drawable.presents;
+                    countChildValue = "presentStickerCount";
+                } else if (stickerId == R.id.laughSticker) {
+                    sentSticker = R.drawable.laugh_sticker;
+                    countChildValue = "laughStickerCount";
+                } else {
+                    sentSticker = R.drawable.burger_sticker;
+                    countChildValue = "burgerStickerCount";
+                }
+                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();
                 // update number of stickers sent by this user
-                StickerMessagingActivity.this.updateStickersSent();
+                StickerMessagingActivity.this.updateStickersSent(countChildValue);
             }
         });
     }
 
-    private void sendStickerMessage(String destUser, String targetToken, int stickerId) {
+    private void sendStickerMessage(String destUser, String targetToken, int sentSticker) {
         // Need to replace static image with chosen image
         // This will write to the database in order to have history
 
         // Get the correct sticker image
-        int sentSticker;
-        if (stickerId == R.id.helloSticker) {
-            sentSticker = R.drawable.hello;
-        } else if (stickerId == R.id.presentSticker) {
-            sentSticker = R.drawable.presents;
-        } else if (stickerId == R.id.laughSticker) {
-            sentSticker = R.drawable.laugh_sticker;
-        } else {
-            sentSticker = R.drawable.burger_sticker;
-        }
+
         System.out.println(sentSticker);
         mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(sentSticker, currentUser, new Date().toString()));
 
@@ -144,7 +151,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jdata.put("title", "Sticker");
             // hardcoded for now, but actual content will be image tapped on by user
             // will have to be handled in on click for the image
-            jdata.put("content", R.drawable.presents);
+            jdata.put("content", sentSticker);
 
             jPayload.put("to", targetToken);
 
@@ -180,14 +187,14 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     }
 
-    private void updateStickersSent() {
+    private void updateStickersSent(String countChildValue) {
         mDatabase.child("users").child(currentUser).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());
             } else {
-                int stickersSent = Integer.parseInt(String.valueOf(task.getResult().child("stickersSent").getValue()));
+                int stickersSent = Integer.parseInt(String.valueOf(task.getResult().child(countChildValue).getValue()));
                 int newStickersSent = stickersSent + 1;
-                mDatabase.child("users").child(currentUser).child("stickersSent").setValue(newStickersSent);
+                mDatabase.child("users").child(currentUser).child(countChildValue).setValue(newStickersSent);
             }
         });
     }

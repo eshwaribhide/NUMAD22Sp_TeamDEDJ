@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 public class StickersReceivedActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private String currentUser;
-    private TextView stickersReceivedLabel;
     private RecyclerView recyclerView;
     private StickersReceivedRecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;

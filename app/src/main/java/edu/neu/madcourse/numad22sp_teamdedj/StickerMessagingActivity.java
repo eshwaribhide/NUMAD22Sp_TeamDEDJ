@@ -28,11 +28,8 @@ import java.util.Scanner;
 
 // Current issues
 // 1. user should only be created if does not exist, right now gets overwritten, perhaps add some ChildEventListeners
-// 2. need to add more stickers
-// 3. need to add on click functionality to a sticker to make tapping on it the way to send
-// 4. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
-// 5. then everything needs to be designed properly (e.g. if we have multiple stickers, maybe a slideshow type thing? Because we can’t tap on the sticker since tapping sends it. Or just have like 2 stickers or something and then lay them out.)
-// 6. foreground notifications do not work and also banner notification does not work for some reason
+// 2. should only render sticker if exists, if path does not exist then have to have some message/error sticker
+// 3. foreground notifications do not work and also banner notification does not work for some reason
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";
@@ -67,11 +64,10 @@ public class StickerMessagingActivity extends AppCompatActivity {
                     currentUser = b.getString("currentUser");
                 }
                  //FOR TESTING
-                // I assume this is why the history page always shows 8 stickers sent
-                 currentUser="user2";
+                 //currentUser="user2";
                 // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
-                // mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
-                // Log.e(TAG, "CREATED USER");
+                 mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                 Log.e(TAG, "CREATED USER");
 
                 Spinner destUsersDropdown = findViewById(R.id.destUsers);
 
@@ -128,12 +124,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     private void sendStickerMessage(String destUser, String targetToken, int sentSticker) {
-        // Need to replace static image with chosen image
-        // This will write to the database in order to have history
-
-        // Get the correct sticker image
-
-        System.out.println(sentSticker);
         mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(sentSticker, currentUser, new Date().toString()));
 
         // This has to do with notifications
@@ -182,9 +172,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(TAG, "IO Exception in sending message");
         }
-
-        //postToastMessage("Status from Server: " + resp, getApplicationContext());
-
     }
 
     private void updateStickersSent(String countChildValue) {
@@ -198,12 +185,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
             }
         });
     }
-
-//    // Just called at the beginning once message is finished being sent. Can be deleted later.
-//    public static void postToastMessage(final String message, final Context context){
-//        Handler handler = new Handler(Looper.getMainLooper());
-//        handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
-//    }
 
     public void stickersReceivedButtonOnClick(View view) {
         Intent intent = new Intent(this, StickersReceivedActivity.class);

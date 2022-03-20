@@ -6,10 +6,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -19,7 +17,6 @@ import java.util.ArrayList;
 public class StickersSentActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private String currentUser;
-    private TextView StickersSentLabel;
     private RecyclerView recyclerView;
     private StickersSentRecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
@@ -27,9 +24,9 @@ public class StickersSentActivity extends AppCompatActivity {
 
     public static class StickersSent {
         private final int stickerSource;
-        private final int stickerCount;
+        private final String stickerCount;
 
-        public StickersSent(int stickerSource, int stickerCount) {
+        public StickersSent(int stickerSource, String stickerCount) {
             this.stickerSource = stickerSource;
             this.stickerCount = stickerCount;
         }
@@ -38,7 +35,7 @@ public class StickersSentActivity extends AppCompatActivity {
             return stickerSource;
         }
 
-        public int getstickerCount() {
+        public String getstickerCount() {
             return stickerCount;
         }
     }
@@ -63,18 +60,10 @@ public class StickersSentActivity extends AppCompatActivity {
                     if (!t.isSuccessful()) {
                         Log.e("firebase", "Error getting data", task.getException());
                     } else {
-                        for (DataSnapshot dschild : t.getResult().getChildren()) {
-                            if (dschild.hasChildren()) {
-                                // It's a Sticker Node, need to parse the data
-                                int stickerID = Integer.parseInt(String.valueOf(dschild.child("stickerID").getValue()));
-                                int stickerCount =0;
-
-
-                                Log.d("Sticker path", String.valueOf(stickerID));
-
-                                addHistoryItemToRecyclerView(stickerID, stickerCount);
-                            }
-                        }
+                        addHistoryItemToRecyclerView(R.drawable.hello, "Sent " + t.getResult().child("helloStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.presents, "Sent " + t.getResult().child("presentStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.laugh_sticker, "Sent " + t.getResult().child("laughStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.burger_sticker, "Sent " + t.getResult().child("burgerStickerCount").getValue() + " times");
                     }
                 });
             }
@@ -82,7 +71,7 @@ public class StickersSentActivity extends AppCompatActivity {
         generateRecyclerView();
     }
 
-    private void addHistoryItemToRecyclerView(Integer stickerID, Integer stickerCount) {
+    private void addHistoryItemToRecyclerView(Integer stickerID, String stickerCount) {
         recyclerViewLayoutManager.smoothScrollToPosition(recyclerView, null, 0);
         StickersSent.add(0, new StickersSent(stickerID, stickerCount));
         recyclerViewAdapter.notifyItemInserted(0);
@@ -90,7 +79,7 @@ public class StickersSentActivity extends AppCompatActivity {
 
     private void generateRecyclerView() {
         recyclerViewLayoutManager = new LinearLayoutManager(this);
-        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerViewSent);
         recyclerView.setHasFixedSize(true);
 
         recyclerViewAdapter = new StickersSentRecyclerViewAdapter(StickersSent);

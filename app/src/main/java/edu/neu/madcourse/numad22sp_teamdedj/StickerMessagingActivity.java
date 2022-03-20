@@ -217,4 +217,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void stickersSentButtonOnClick(View view) {
+        Intent intent = new Intent(this, StickersSentActivity.class);
+        // Enclose the currentUser information as a parameter
+        Bundle b = new Bundle();
+        b.putString("currentUser", currentUser);
+        intent.putExtras(b);
+        startActivity(intent);
+    }
+
 }

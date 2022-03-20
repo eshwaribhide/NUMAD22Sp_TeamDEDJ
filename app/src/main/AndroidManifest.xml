@@ -9,8 +9,19 @@
         android:roundIcon="@mipmap/ic_launcher_dedj_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NUMAD22Sp_TeamDEDJ">
-        <activity android:name=".StickersReceivedActivity"
+        <activity
+            android:name=".StickersSentActivity"
             android:parentActivityName=".StickerMessagingActivity">
+
+            <!-- The meta-data tag is required if you support API level 15 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".StickerMessagingActivity" />
+        </activity>
+        <activity
+            android:name=".StickersReceivedActivity"
+            android:parentActivityName=".StickerMessagingActivity">
+
             <!-- The meta-data tag is required if you support API level 15 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

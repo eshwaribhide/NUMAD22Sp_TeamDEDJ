@@ -16,35 +16,30 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 
-public class StickersReceivedActivity extends AppCompatActivity {
+public class StickersSentActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private String currentUser;
-    private TextView stickersReceivedLabel;
+    private TextView StickersSentLabel;
     private RecyclerView recyclerView;
-    private StickersReceivedRecyclerViewAdapter recyclerViewAdapter;
+    private StickersSentRecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
-    private ArrayList<StickersReceived> stickersReceived = new ArrayList<>();
+    private ArrayList<StickersSent> StickersSent = new ArrayList<>();
 
-    public static class StickersReceived {
+    public static class StickersSent {
         private final int stickerSource;
-        private final String stickerSender;
-        private final String stickerTime;
+        private final int stickerCount;
 
-        public StickersReceived(int stickerSource, String stickerSender, String stickerTime) {
+        public StickersSent(int stickerSource, int stickerCount) {
             this.stickerSource = stickerSource;
-            this.stickerSender = stickerSender;
-            this.stickerTime = stickerTime;
+            this.stickerCount = stickerCount;
         }
 
         public int getstickerSource() {
             return stickerSource;
         }
 
-        public String getstickerSender() {
-            return stickerSender;
-        }
-        public String getstickerTime() {
-            return stickerTime;
+        public int getstickerCount() {
+            return stickerCount;
         }
     }
 
@@ -56,7 +51,7 @@ public class StickersReceivedActivity extends AppCompatActivity {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("CANNOT GET TOKEN", "no token");
-                Toast toast = Toast.makeText(StickersReceivedActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(StickersSentActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
                 toast.show();
             } else {
                 mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -72,13 +67,12 @@ public class StickersReceivedActivity extends AppCompatActivity {
                             if (dschild.hasChildren()) {
                                 // It's a Sticker Node, need to parse the data
                                 int stickerID = Integer.parseInt(String.valueOf(dschild.child("stickerID").getValue()));
-                                String senderName = "Sent By: " + dschild.child("senderName").getValue();
-                                String timeSent = String.valueOf(dschild.child("timeSent").getValue());
+                                int stickerCount =0;
+
 
                                 Log.d("Sticker path", String.valueOf(stickerID));
-                                Log.d("Sticker sender", senderName);
-                                Log.d("Sticker time", timeSent);
-                                addHistoryItemToRecyclerView(stickerID, senderName, timeSent);
+
+                                addHistoryItemToRecyclerView(stickerID, stickerCount);
                             }
                         }
                     }
@@ -88,22 +82,22 @@ public class StickersReceivedActivity extends AppCompatActivity {
         generateRecyclerView();
     }
 
-        private void addHistoryItemToRecyclerView(Integer stickerID, String senderName, String timeSent) {
-            recyclerViewLayoutManager.smoothScrollToPosition(recyclerView, null, 0);
-            stickersReceived.add(0, new StickersReceived(stickerID, senderName, timeSent));
-            recyclerViewAdapter.notifyItemInserted(0);
-        }
+    private void addHistoryItemToRecyclerView(Integer stickerID, Integer stickerCount) {
+        recyclerViewLayoutManager.smoothScrollToPosition(recyclerView, null, 0);
+        StickersSent.add(0, new StickersSent(stickerID, stickerCount));
+        recyclerViewAdapter.notifyItemInserted(0);
+    }
 
-        private void generateRecyclerView() {
-            recyclerViewLayoutManager = new LinearLayoutManager(this);
-            recyclerView = findViewById(R.id.recyclerView);
-            recyclerView.setHasFixedSize(true);
+    private void generateRecyclerView() {
+        recyclerViewLayoutManager = new LinearLayoutManager(this);
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
 
-            recyclerViewAdapter = new StickersReceivedRecyclerViewAdapter(stickersReceived);
+        recyclerViewAdapter = new StickersSentRecyclerViewAdapter(StickersSent);
 
-            recyclerView.setAdapter(recyclerViewAdapter);
-            recyclerView.setLayoutManager(recyclerViewLayoutManager);
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setLayoutManager(recyclerViewLayoutManager);
 
-        }
+    }
 
 }

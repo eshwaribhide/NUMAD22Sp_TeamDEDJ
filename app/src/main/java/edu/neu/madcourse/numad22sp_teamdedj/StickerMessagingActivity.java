@@ -198,8 +198,17 @@ public class StickerMessagingActivity extends AppCompatActivity {
 //        handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
 //    }
 
-    public void historyButtonOnClick(View view) {
+    public void stickersReceivedButtonOnClick(View view) {
         Intent intent = new Intent(this, StickersReceivedActivity.class);
+        // Enclose the currentUser information as a parameter
+        Bundle b = new Bundle();
+        b.putString("currentUser", currentUser);
+        intent.putExtras(b);
+        startActivity(intent);
+    }
+
+    public void stickersSentButtonOnClick(View view) {
+        Intent intent = new Intent(this, StickersSentActivity.class);
         // Enclose the currentUser information as a parameter
         Bundle b = new Bundle();
         b.putString("currentUser", currentUser);

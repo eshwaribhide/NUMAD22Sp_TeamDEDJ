@@ -24,7 +24,7 @@
         android:id="@+id/stickersReceivedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="historyButtonOnClick"
+        android:onClick="stickersReceivedButtonOnClick"
         android:text="Stickers Received"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -92,8 +92,11 @@
         android:id="@+id/stickersSentButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:onClick="stickersSentButtonOnClick"
         android:text="Stickers Sent"
-        tools:layout_editor_absoluteX="108dp"
-        tools:layout_editor_absoluteY="729dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stickersReceivedButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

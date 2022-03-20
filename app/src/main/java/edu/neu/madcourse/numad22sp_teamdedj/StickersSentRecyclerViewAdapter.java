@@ -26,7 +26,7 @@ public class StickersSentRecyclerViewAdapter extends RecyclerView.Adapter<Sticke
 
         public StickersSentRecyclerViewHolder(View itemView, final ListItemClickListener listener) {
             super(itemView);
-            sticker = itemView.findViewById(R.id.stickerSent);
+            sticker = itemView.findViewById(R.id.stickersSentLabel);
             stickerCount = itemView.findViewById(R.id.stickerCount);
         }
     }
@@ -34,7 +34,7 @@ public class StickersSentRecyclerViewAdapter extends RecyclerView.Adapter<Sticke
     @NonNull
     @Override
     public StickersSentRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.stickers_received_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.stickers_sent_item, parent, false);
         return new StickersSentRecyclerViewHolder(view, listener);
     }
 

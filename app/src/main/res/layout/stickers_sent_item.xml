@@ -12,7 +12,7 @@
         android:layout_margin="5dp">
 
         <ImageView
-            android:id="@+id/stickerSent"
+            android:id="@+id/stickersSentLabel"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="5dp"
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="7dp"
             android:layout_marginStart="10dp"
-            android:layout_toEndOf="@+id/stickerSent"
+            android:layout_toEndOf="@+id/stickersSentLabel"
             android:textColor="@color/purple_500"
             android:textSize="20sp"
             android:textStyle="bold"

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
             Bundle b = new Bundle();
             b.putString("currentUser", username);
             intent.putExtras(b);
+            Log.e("MAKING CURRENT USER", username);
             startActivity(intent);
         });
 

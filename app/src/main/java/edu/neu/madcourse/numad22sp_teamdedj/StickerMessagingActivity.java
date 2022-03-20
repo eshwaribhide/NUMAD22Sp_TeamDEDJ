@@ -63,8 +63,10 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 if (b != null) {
                     currentUser = b.getString("currentUser");
                 }
+
+                Log.e("CURRENT_USER", currentUser);
                  //FOR TESTING
-                 //currentUser="user2";
+                 currentUser="user2";
                 // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
                  mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
                  Log.e(TAG, "CREATED USER");

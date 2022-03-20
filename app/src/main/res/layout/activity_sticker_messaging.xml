@@ -30,7 +30,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/laughSticker"
-        app:layout_constraintVertical_bias="0.771" />
+        app:layout_constraintVertical_bias="0.114" />
 
     <Spinner
         android:id="@+id/destUsers"
@@ -40,38 +40,37 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/destUserLabel"
         app:layout_constraintVertical_bias="0.1" />
 
     <ImageView
         android:id="@+id/helloSticker"
         android:layout_width="108dp"
         android:layout_height="124dp"
+        android:layout_marginTop="16dp"
         android:onClick="sendStickerMessage"
         app:layout_constraintEnd_toStartOf="@+id/presentSticker"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/destUsers"
-        app:layout_constraintBottom_toTopOf="@+id/laughSticker"
-        app:srcCompat="@drawable/hello"
-        tools:layout_editor_absoluteY="303dp" />
+        app:srcCompat="@drawable/hello" />
 
     <ImageView
         android:id="@+id/presentSticker"
         android:layout_width="108dp"
         android:layout_height="124dp"
+        android:layout_marginTop="16dp"
         android:onClick="sendStickerMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/helloSticker"
         app:layout_constraintTop_toBottomOf="@+id/destUsers"
-        app:layout_constraintBottom_toTopOf="@+id/laughSticker"
-        app:srcCompat="@drawable/presents"
-        tools:layout_editor_absoluteY="300dp" />
+        app:srcCompat="@drawable/presents" />
 
     <ImageView
         android:id="@+id/laughSticker"
         android:layout_width="108dp"
         android:layout_height="124dp"
+        android:layout_marginTop="8dp"
         android:onClick="sendStickerMessage"
-        app:layout_constraintBottom_toTopOf="@+id/historyButton"
         app:layout_constraintEnd_toStartOf="@+id/burgerSticker"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/helloSticker"
@@ -81,8 +80,8 @@
         android:id="@+id/burgerSticker"
         android:layout_width="108dp"
         android:layout_height="124dp"
+        android:layout_marginTop="8dp"
         android:onClick="sendStickerMessage"
-        app:layout_constraintBottom_toTopOf="@+id/historyButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/laughSticker"
         app:layout_constraintTop_toBottomOf="@+id/presentSticker"
@@ -98,5 +97,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/historyButton" />
+
+    <TextView
+        android:id="@+id/destUserLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Destination user"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/destUsers"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.28"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

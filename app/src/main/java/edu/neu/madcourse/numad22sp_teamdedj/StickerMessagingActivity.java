@@ -27,12 +27,8 @@ import java.util.Date;
 import java.util.Scanner;
 
 // Current issues
-// 1. user should only be created if does not exist, right now gets overwritten, perhaps add some ChildEventListeners
-// 2. need to add more stickers
-// 3. need to add on click functionality to a sticker to make tapping on it the way to send
-// 4. Also should only render sticker if exists, if path does not exist then have to have some message/error sticker
-// 5. then everything needs to be designed properly (e.g. if we have multiple stickers, maybe a slideshow type thing? Because we can’t tap on the sticker since tapping sends it. Or just have like 2 stickers or something and then lay them out.)
-// 6. foreground notifications do not work and also banner notification does not work for some reason
+// 1. Only render sticker in history if exists, if path does not exist then have to have some message/error sticker
+// 2. foreground notifications do not work and also banner notification does not work for some reason
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";
@@ -54,6 +50,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_messaging);
+        Log.e("IN ON CREATE", "STICKER MESSAGING");
 
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
@@ -62,32 +59,36 @@ public class StickerMessagingActivity extends AppCompatActivity {
             } else {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
-                Bundle b = getIntent().getExtras();
-                if (b != null) {
-                    currentUser = b.getString("currentUser");
-                }
                  //FOR TESTING
-                // I assume this is why the history page always shows 8 stickers sent
-                 currentUser="user2";
-                // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
-                //mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
-                // Log.e(TAG, "CREATED USER");
-
-                Spinner destUsersDropdown = findViewById(R.id.destUsers);
-
-                // Get all users from the database and add to the dropdown
-                mDatabase.child("users").get().addOnCompleteListener(t -> {
-                    if (!t.isSuccessful()) {
-                        Log.e("firebase", "Error getting data", task.getException());
+                mDatabase.child("currentUser").get().addOnCompleteListener(t1 -> {
+                    if (!t1.isSuccessful()) {
+                        Log.e("firebase", "Error getting data", t1.getException());
                     } else {
-                        ArrayList<String> destUsers = new ArrayList<>();
-                        for (DataSnapshot dschild : t.getResult().getChildren()) {
-                            destUsers.add(String.valueOf(dschild.getKey()));
-                        }
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, destUsers);
-                        destUsersDropdown.setAdapter(adapter);
-                    }
-                });
+                        currentUser = String.valueOf(t1.getResult().getValue());
+                        mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
+                            if (t2.getResult().getValue() == null) {
+                                mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                            }
+                            Spinner destUsersDropdown = findViewById(R.id.destUsers);
+
+                            // Get all users from the database and add to the dropdown
+                            mDatabase.child("users").get().addOnCompleteListener(t3 -> {
+                                if (!t3.isSuccessful()) {
+                                    Log.e("firebase", "Error getting data", t3.getException());
+                                } else {
+                                    ArrayList<String> destUsers = new ArrayList<>();
+                                    for (DataSnapshot dschild : t3.getResult().getChildren()) {
+                                        destUsers.add(String.valueOf(dschild.getKey()));
+                                    }
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, destUsers);
+                                    destUsersDropdown.setAdapter(adapter);
+                                }
+                            });
+
+                        });
+                    }});
+
+
             }
         });
     }

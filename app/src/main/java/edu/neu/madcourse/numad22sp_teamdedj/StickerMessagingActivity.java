@@ -77,6 +77,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                     currentUser = b.getString("currentUser");
                 }
                  //FOR TESTING
+                // I assume this is why the history page always shows 8 stickers sent
                  currentUser="user2";
                 // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
                 // mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
@@ -84,6 +85,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
                 Spinner destUsersDropdown = findViewById(R.id.destUsers);
 
+                // Get all users from the database and add to the dropdown
                 mDatabase.child("users").get().addOnCompleteListener(t -> {
                     if (!t.isSuccessful()) {
                         Log.e("firebase", "Error getting data", task.getException());
@@ -100,6 +102,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
         });
     }
 
+    // send a sticker from the device to the selected user
     public void sendStickerMessage(View view) {
         Spinner destUsersDropdown = findViewById(R.id.destUsers);
         String destUser = destUsersDropdown.getSelectedItem().toString();
@@ -108,19 +111,33 @@ public class StickerMessagingActivity extends AppCompatActivity {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());
             } else {
+                // get token of the user from the database
                 String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
                 // send the message
-                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken)).start();
+                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, view.getId())).start();
                 // update number of stickers sent by this user
                 StickerMessagingActivity.this.updateStickersSent();
             }
         });
     }
 
-    private void sendStickerMessage(String destUser, String targetToken) {
+    private void sendStickerMessage(String destUser, String targetToken, int stickerId) {
         // Need to replace static image with chosen image
         // This will write to the database in order to have history
-        mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(R.drawable.presents, currentUser, new Date().toString()));
+
+        // Get the correct sticker image
+        int sentSticker;
+        if (stickerId == R.id.helloSticker) {
+            sentSticker = R.drawable.hello;
+        } else if (stickerId == R.id.presentSticker) {
+            sentSticker = R.drawable.presents;
+        } else if (stickerId == R.id.laughSticker) {
+            sentSticker = R.drawable.laugh_sticker;
+        } else {
+            sentSticker = R.drawable.burger_sticker;
+        }
+        System.out.println(sentSticker);
+        mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(sentSticker, currentUser, new Date().toString()));
 
         // This has to do with notifications
         JSONObject jPayload = new JSONObject();

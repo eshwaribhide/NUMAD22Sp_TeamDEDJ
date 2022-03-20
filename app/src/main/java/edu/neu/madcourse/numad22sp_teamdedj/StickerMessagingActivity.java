@@ -1,28 +1,18 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -80,7 +70,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 // I assume this is why the history page always shows 8 stickers sent
                  currentUser="user2";
                 // Need to only set this if the current user does not exist, perhaps add some ChildEventListeners
-                // mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
                 // Log.e(TAG, "CREATED USER");
 
                 Spinner destUsersDropdown = findViewById(R.id.destUsers);
@@ -113,30 +103,30 @@ public class StickerMessagingActivity extends AppCompatActivity {
             } else {
                 // get token of the user from the database
                 String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
-                // send the message
-                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, view.getId())).start();
+
+                int stickerId = view.getId();
+                int sentSticker;
+                String countChildValue;
+                if (stickerId == R.id.helloSticker) {
+                    sentSticker = R.drawable.hello;
+                    countChildValue = "helloStickerCount";
+                } else if (stickerId == R.id.presentSticker) {
+                    sentSticker = R.drawable.presents;
+                    countChildValue = "presentStickerCount";
+                } else if (stickerId == R.id.laughSticker) {
+                    sentSticker = R.drawable.laugh_sticker;
+                    countChildValue = "laughStickerCount";
+                } else {
+                    sentSticker = R.drawable.burger_sticker;
+                    countChildValue = "burgerStickerCount";
+                }
+                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();
                 // update number of stickers sent by this user
-                StickerMessagingActivity.this.updateStickersSent();
+                StickerMessagingActivity.this.updateStickersSent(countChildValue);
             }
         });
     }
-
-    private void sendStickerMessage(String destUser, String targetToken, int stickerId) {
-        // Need to replace static image with chosen image
-        // This will write to the database in order to have history
-
-        // Get the correct sticker image
-        int sentSticker;
-        if (stickerId == R.id.helloSticker) {
-            sentSticker = R.drawable.hello;
-        } else if (stickerId == R.id.presentSticker) {
-            sentSticker = R.drawable.presents;
-        } else if (stickerId == R.id.laughSticker) {
-            sentSticker = R.drawable.laugh_sticker;
-        } else {
-            sentSticker = R.drawable.burger_sticker;
-        }
-        System.out.println(sentSticker);
+    private void sendStickerMessage(String destUser, String targetToken, int sentSticker) {
         mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(sentSticker, currentUser, new Date().toString()));
 
         // This has to do with notifications
@@ -154,7 +144,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jdata.put("title", "Sticker");
             // hardcoded for now, but actual content will be image tapped on by user
             // will have to be handled in on click for the image
-            jdata.put("content", R.drawable.presents);
+            jdata.put("content", sentSticker);
 
             jPayload.put("to", targetToken);
 
@@ -186,27 +176,19 @@ public class StickerMessagingActivity extends AppCompatActivity {
             Log.e(TAG, "IO Exception in sending message");
         }
 
-        //postToastMessage("Status from Server: " + resp, getApplicationContext());
-
     }
 
-    private void updateStickersSent() {
+    private void updateStickersSent(String countChildValue) {
         mDatabase.child("users").child(currentUser).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());
             } else {
-                int stickersSent = Integer.parseInt(String.valueOf(task.getResult().child("stickersSent").getValue()));
+                int stickersSent = Integer.parseInt(String.valueOf(task.getResult().child(countChildValue).getValue()));
                 int newStickersSent = stickersSent + 1;
-                mDatabase.child("users").child(currentUser).child("stickersSent").setValue(newStickersSent);
+                mDatabase.child("users").child(currentUser).child(countChildValue).setValue(newStickersSent);
             }
         });
     }
-
-//    // Just called at the beginning once message is finished being sent. Can be deleted later.
-//    public static void postToastMessage(final String message, final Context context){
-//        Handler handler = new Handler(Looper.getMainLooper());
-//        handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
-//    }
 
     public void historyButtonOnClick(View view) {
         Intent intent = new Intent(this, HistoryActivity.class);

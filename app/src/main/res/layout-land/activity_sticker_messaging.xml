@@ -24,24 +24,35 @@
         android:id="@+id/historyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:onClick="historyButtonOnClick"
         android:text="Stickers Received"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/stickersSentButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/laughSticker"
-        app:layout_constraintVertical_bias="0.114" />
+        app:layout_constraintTop_toBottomOf="@+id/presentSticker" />
 
     <Spinner
         android:id="@+id/destUsers"
         android:layout_width="239dp"
         android:layout_height="54dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/destUserLabel"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.1" />
+
+    <ImageView
+        android:id="@+id/helloSticker"
+        android:layout_width="108dp"
+        android:layout_height="124dp"
+        android:layout_marginTop="16dp"
+        android:onClick="sendStickerMessage"
+        app:layout_constraintEnd_toStartOf="@+id/presentSticker"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/destUsers"
+        app:srcCompat="@drawable/hello" />
 
     <ImageView
         android:id="@+id/presentSticker"
@@ -49,63 +60,53 @@
         android:layout_height="124dp"
         android:layout_marginTop="16dp"
         android:onClick="sendStickerMessage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/destUsers"
         app:layout_constraintStart_toEndOf="@+id/helloSticker"
+        app:layout_constraintTop_toBottomOf="@+id/destUsers"
+        app:layout_constraintEnd_toStartOf="@+id/laughSticker"
         app:srcCompat="@drawable/presents" />
 
     <ImageView
         android:id="@+id/laughSticker"
         android:layout_width="108dp"
         android:layout_height="124dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:onClick="sendStickerMessage"
         app:layout_constraintEnd_toStartOf="@+id/burgerSticker"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/helloSticker"
+        app:layout_constraintStart_toEndOf="@+id/presentSticker"
+        app:layout_constraintTop_toBottomOf="@id/destUsers"
         app:srcCompat="@drawable/laugh_sticker" />
-
-    <ImageView
-        android:id="@+id/helloSticker"
-        android:layout_width="108dp"
-        android:layout_height="124dp"
-        android:layout_marginTop="16dp"
-        app:srcCompat="@drawable/hello"
-        android:onClick="sendStickerMessage"
-        app:layout_constraintEnd_toStartOf="@+id/presentSticker"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/destUsers" />
 
     <ImageView
         android:id="@+id/burgerSticker"
         android:layout_width="108dp"
         android:layout_height="124dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:onClick="sendStickerMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/laughSticker"
-        app:layout_constraintTop_toBottomOf="@+id/presentSticker"
+        app:layout_constraintTop_toBottomOf="@id/destUsers"
         app:srcCompat="@drawable/burger_sticker" />
 
     <Button
         android:id="@+id/stickersSentButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:onClick="stickersSentButtonOnClick"
         android:text="Stickers Sent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/historyButton" />
+        app:layout_constraintStart_toEndOf="@+id/historyButton"
+        app:layout_constraintTop_toBottomOf="@+id/presentSticker" />
 
     <TextView
         android:id="@+id/destUserLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Destination user"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/destUsers"
-        app:layout_constraintStart_toStartOf="@id/destUsers"
+        app:layout_constraintStart_toStartOf="@+id/destUsers"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

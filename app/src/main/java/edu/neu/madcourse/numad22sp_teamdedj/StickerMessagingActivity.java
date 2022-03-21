@@ -27,8 +27,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 // Current issues
-// 1. Only render sticker in history if exists, if path does not exist then have to have some message/error sticker
-// 2. foreground notifications do not work and also banner notification does not work for some reason
+// 1. foreground notifications do not work and also banner notification does not work for some reason
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";

@@ -80,7 +80,14 @@ public class HistoryActivity extends AppCompatActivity {
                                 Log.d("Sticker path", String.valueOf(stickerID));
                                 Log.d("Sticker sender", senderName);
                                 Log.d("Sticker time", timeSent);
-                                addHistoryItemToRecyclerView(stickerID, senderName, timeSent);
+                                // Handling the case in which an unknown sticker identifier is received because two users have different versions of the app
+                                if (stickerID != R.drawable.hello && stickerID != R.drawable.presents &&
+                                stickerID != R.drawable.burger_sticker && stickerID != R.drawable.laugh_sticker) {
+                                    addHistoryItemToRecyclerView(R.drawable.question_mark, senderName, timeSent);
+                                }
+                                else {
+                                    addHistoryItemToRecyclerView(stickerID, senderName, timeSent);
+                                }
                             }
                         }
                     }

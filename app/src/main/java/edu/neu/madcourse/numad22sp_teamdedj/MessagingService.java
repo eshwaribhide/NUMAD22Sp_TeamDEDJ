@@ -37,11 +37,6 @@ public class MessagingService extends FirebaseMessagingService {
         // sendRegistrationToServer(refreshedToken);
     }
 
-
-
-
-
-
     /**
      * Called when message is received.
      *
@@ -71,12 +66,10 @@ public class MessagingService extends FirebaseMessagingService {
         NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,
                 CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
 
-        // Configure the notification channel
         notificationChannel.setDescription(CHANNEL_DESC);
         notificationManager.createNotificationChannel(notificationChannel);
         builder = new NotificationCompat.Builder(this, CHANNEL_ID);
 
-        // designing the notification bar with the icon in it
         notification = builder.setContentTitle(remoteMessageNotification.getNotification().getTitle())
                 .setContentText("You got a sticker!")
                 .setSmallIcon(R.mipmap.ic_launcher_dedj)

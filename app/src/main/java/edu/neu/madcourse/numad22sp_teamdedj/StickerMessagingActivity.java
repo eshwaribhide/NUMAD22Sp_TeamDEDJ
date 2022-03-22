@@ -1,8 +1,14 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -48,6 +54,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        createNotificationChannel();
         setContentView(R.layout.activity_sticker_messaging);
         Log.e("IN ON CREATE", "STICKER MESSAGING");
 
@@ -123,11 +130,31 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();
                 // update number of stickers sent by this user
                 StickerMessagingActivity.this.updateStickersSent(countChildValue);
+
+
+
             }
         });
     }
     private void sendStickerMessage(String destUser, String targetToken, int sentSticker) {
         mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(sentSticker, currentUser, new Date().toString()));
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this, ReceiveNotificationActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, 0);
+
+        PendingIntent callIntent = PendingIntent.getActivity(this, (int)System.currentTimeMillis(),
+                new Intent(this, StickerMessagingActivity.class), 0);
+
+        String channelId = getString(R.string.channel_id);
+        Notification notification = new NotificationCompat.Builder(
+                this, channelId)
+                .setContentTitle("New Sticker")
+                .setSmallIcon(R.mipmap.ic_launcher_dedj_round)
+                .setContentIntent(pIntent)
+                .build();
+
+        notificationManager.notify(0, notification);
 
         // This has to do with notifications
         JSONObject jPayload = new JSONObject();
@@ -206,6 +233,23 @@ public class StickerMessagingActivity extends AppCompatActivity {
         b.putString("currentUser", currentUser);
         intent.putExtras(b);
         startActivity(intent);
+    }
+
+    public void createNotificationChannel() {
+        // This must be called early because it must be called before a notification is sent.
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(getString(R.string.channel_id), name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
 }

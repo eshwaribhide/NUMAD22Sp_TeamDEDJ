@@ -34,7 +34,7 @@ public class MessagingService extends FirebaseMessagingService {
     public void onNewToken(String newToken) {
         Log.d(TAG, "Refreshed token: " + newToken);
     }
-    
+
     @Override
     public void onMessageReceived(@NotNull RemoteMessage remoteMessage) {
         if (remoteMessage.getNotification() != null) {
@@ -63,7 +63,7 @@ public class MessagingService extends FirebaseMessagingService {
         builder = new NotificationCompat.Builder(this, CHANNEL_ID);
 
         notification = builder.setContentTitle(remoteMessageNotification.getNotification().getTitle())
-                .setContentText("You got a sticker!")
+                .setContentText("New sticker received!")
                 .setSmallIcon(R.mipmap.ic_launcher_dedj_round)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)

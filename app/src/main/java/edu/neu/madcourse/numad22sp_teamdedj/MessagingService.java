@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -15,6 +16,8 @@ import androidx.core.app.NotificationCompat;
 import com.google.firebase.database.annotations.NotNull;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Objects;
 
 public class MessagingService extends FirebaseMessagingService {
     private static final String TAG = "StickerMessagingActivity";
@@ -72,7 +75,7 @@ public class MessagingService extends FirebaseMessagingService {
 
         notification = builder.setContentTitle(remoteMessageNotification.getNotification().getTitle())
                 .setContentText("You got a sticker!")
-                .setSmallIcon(R.mipmap.ic_launcher_dedj)
+                .setSmallIcon(R.mipmap.ic_launcher_dedj_round)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .build();

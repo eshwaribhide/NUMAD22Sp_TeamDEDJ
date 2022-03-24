@@ -1,5 +1,6 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
@@ -16,6 +17,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -54,10 +57,8 @@ public class StickerMessagingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        createNotificationChannel();
         setContentView(R.layout.activity_sticker_messaging);
         Log.e("IN ON CREATE", "STICKER MESSAGING");
-
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Toast toast = Toast.makeText(StickerMessagingActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
@@ -71,6 +72,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                         Log.e("firebase", "Error getting data", t1.getException());
                     } else {
                         currentUser = String.valueOf(t1.getResult().getValue());
+                        createNotificationChannel();
                         mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
                             if (t2.getResult().getValue() == null) {
                                 mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
@@ -93,8 +95,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
                         });
                     }});
-
-
             }
         });
     }
@@ -131,35 +131,17 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 // update number of stickers sent by this user
                 StickerMessagingActivity.this.updateStickersSent(countChildValue);
 
-
-
             }
         });
     }
+
     private void sendStickerMessage(String destUser, String targetToken, int sentSticker) {
         mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(sentSticker, currentUser, new Date().toString()));
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        Intent intent = new Intent(this, ReceiveNotificationActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, 0);
-
-        PendingIntent callIntent = PendingIntent.getActivity(this, (int)System.currentTimeMillis(),
-                new Intent(this, StickerMessagingActivity.class), 0);
-
-        String channelId = getString(R.string.channel_id);
-        Notification notification = new NotificationCompat.Builder(
-                this, channelId)
-                .setContentTitle("New Sticker")
-                .setSmallIcon(R.mipmap.ic_launcher_dedj_round)
-                .setContentIntent(pIntent)
-                .build();
-
-        notificationManager.notify(0, notification);
 
         // This has to do with notifications
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
-        JSONObject jdata = new JSONObject();
+        JSONObject jData = new JSONObject();
         try {
             jNotification.put("title", "Sticker Received");
             jNotification.put("body", "View Sticker");
@@ -168,16 +150,16 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jNotification.put("image", "https://i.imgur.com/Or7eeA9.jpg");
 
 
-            jdata.put("title", "Sticker");
+            jData.put("title", "Sticker");
             // hardcoded for now, but actual content will be image tapped on by user
             // will have to be handled in on click for the image
-            jdata.put("content", sentSticker);
+            jData.put("content", sentSticker);
 
-            jPayload.put("to", targetToken);
+            jPayload.put("to", "/topics/" + destUser);
 
             jPayload.put("priority", "high");
             jPayload.put("notification", jNotification);
-            jPayload.put("data", jdata);
+            jPayload.put("data", jData);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -236,20 +218,32 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     public void createNotificationChannel() {
-        // This must be called early because it must be called before a notification is sent.
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
             String description = getString(R.string.channel_description);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(getString(R.string.channel_id), name, importance);
+            NotificationChannel channel = new NotificationChannel(getString(R.string.channel_id), currentUser, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
+            subscribeToStickerNotifications();
         }
     }
 
+    public void subscribeToStickerNotifications(){
+
+        FirebaseMessaging.getInstance().subscribeToTopic(currentUser)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = currentUser + "is subscribed to notifications";
+                        if (!task.isSuccessful()) {
+                            msg = "Failed to subscribe to " + currentUser + "'s notifications";
+                        }
+                        Log.d(TAG, msg);
+                        Toast.makeText(StickerMessagingActivity.this, msg, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
 }

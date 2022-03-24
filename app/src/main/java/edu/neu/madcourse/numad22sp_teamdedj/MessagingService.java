@@ -33,19 +33,8 @@ public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String newToken) {
         Log.d(TAG, "Refreshed token: " + newToken);
-
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
-        // sendRegistrationToServer(refreshedToken);
     }
-
-    /**
-     * Called when message is received.
-     *
-     * @param remoteMessage Object representing the message received from Firebase Cloud Messaging.
-     */
-    // [START receive_message]
+    
     @Override
     public void onMessageReceived(@NotNull RemoteMessage remoteMessage) {
         if (remoteMessage.getNotification() != null) {

@@ -72,6 +72,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                         Log.e("firebase", "Error getting data", t1.getException());
                     } else {
                         currentUser = String.valueOf(t1.getResult().getValue());
+                        // create the notification channel while currentUser is found
                         createNotificationChannel();
                         mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
                             if (t2.getResult().getValue() == null) {
@@ -155,6 +156,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             // will have to be handled in on click for the image
             jData.put("content", sentSticker);
 
+            // /topics/user will be the topic to subscribe to for currentUser
             jPayload.put("to", "/topics/" + destUser);
 
             jPayload.put("priority", "high");
@@ -223,8 +225,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(getString(R.string.channel_id), currentUser, importance);
             channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
+
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
             subscribeToStickerNotifications();
@@ -232,7 +233,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     public void subscribeToStickerNotifications(){
-
+        // subscribe to incoming stickers for currentUser
         FirebaseMessaging.getInstance().subscribeToTopic(currentUser)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override

@@ -1,8 +1,15 @@
 package edu.neu.madcourse.numad22sp_teamdedj;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +17,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -50,7 +59,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_messaging);
         Log.e("IN ON CREATE", "STICKER MESSAGING");
-
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Toast toast = Toast.makeText(StickerMessagingActivity.this, "Cannot get token", Toast.LENGTH_SHORT);
@@ -64,6 +72,8 @@ public class StickerMessagingActivity extends AppCompatActivity {
                         Log.e("firebase", "Error getting data", t1.getException());
                     } else {
                         currentUser = String.valueOf(t1.getResult().getValue());
+                        // create the notification channel while currentUser is found
+                        createNotificationChannel();
                         mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
                             if (t2.getResult().getValue() == null) {
                                 mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
@@ -86,8 +96,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
                         });
                     }});
-
-
             }
         });
     }
@@ -123,16 +131,18 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();
                 // update number of stickers sent by this user
                 StickerMessagingActivity.this.updateStickersSent(countChildValue);
+
             }
         });
     }
+
     private void sendStickerMessage(String destUser, String targetToken, int sentSticker) {
         mDatabase.child("users").child(destUser).child(new Date().toString()).setValue(new Sticker(sentSticker, currentUser, new Date().toString()));
 
         // This has to do with notifications
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
-        JSONObject jdata = new JSONObject();
+        JSONObject jData = new JSONObject();
         try {
             jNotification.put("title", "Sticker Received");
             jNotification.put("body", "View Sticker");
@@ -141,16 +151,17 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jNotification.put("image", "https://i.imgur.com/Or7eeA9.jpg");
 
 
-            jdata.put("title", "Sticker");
+            jData.put("title", "Sticker");
             // hardcoded for now, but actual content will be image tapped on by user
             // will have to be handled in on click for the image
-            jdata.put("content", sentSticker);
+            jData.put("content", sentSticker);
 
-            jPayload.put("to", targetToken);
+            // /topics/user will be the topic to subscribe to for currentUser
+            jPayload.put("to", "/topics/" + destUser);
 
             jPayload.put("priority", "high");
             jPayload.put("notification", jNotification);
-            jPayload.put("data", jdata);
+            jPayload.put("data", jData);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -208,4 +219,32 @@ public class StickerMessagingActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(getString(R.string.channel_id), currentUser, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+            subscribeToStickerNotifications();
+        }
+    }
+
+    public void subscribeToStickerNotifications(){
+        // subscribe to incoming stickers for currentUser
+        FirebaseMessaging.getInstance().subscribeToTopic(currentUser)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = currentUser + "is subscribed to notifications";
+                        if (!task.isSuccessful()) {
+                            msg = "Failed to subscribe to " + currentUser + "'s notifications";
+                        }
+                        Log.d(TAG, msg);
+                        Toast.makeText(StickerMessagingActivity.this, msg, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
 }

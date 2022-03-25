@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/burger_sticker.xml" value="0.16510416666666666" />
+        <entry key="app/src/main/res/drawable/hello_sticker.xml" value="0.19895833333333332" />
+        <entry key="app/src/main/res/drawable/laugh_sticker.xml" value="0.16510416666666666" />
+        <entry key="app/src/main/res/drawable/presents_sticker.xml" value="0.16510416666666666" />
         <entry key="app/src/main/res/layout-land/activity_sticker_messaging.xml" value="0.335" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.375" />
         <entry key="app/src/main/res/layout/activity_sticker_messaging.xml" value="0.375" />

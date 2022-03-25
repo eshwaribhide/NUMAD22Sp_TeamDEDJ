@@ -122,10 +122,10 @@ public class StickerMessagingActivity extends AppCompatActivity {
                     sentSticker = R.drawable.presents;
                     countChildValue = "presentStickerCount";
                 } else if (stickerId == R.id.laughSticker) {
-                    sentSticker = R.drawable.laugh_sticker;
+                    sentSticker = R.drawable.laugh;
                     countChildValue = "laughStickerCount";
                 } else {
-                    sentSticker = R.drawable.burger_sticker;
+                    sentSticker = R.drawable.burger;
                     countChildValue = "burgerStickerCount";
                 }
                 new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();

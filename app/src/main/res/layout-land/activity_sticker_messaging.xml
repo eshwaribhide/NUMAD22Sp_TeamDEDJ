@@ -85,7 +85,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/laughSticker"
         app:layout_constraintTop_toBottomOf="@id/destUsers"
-        app:srcCompat="@drawable/burger_sticker" />
+        app:srcCompat="@drawable/burger" />
 
     <Button
         android:id="@+id/stickersSentButton"

@@ -52,7 +52,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/destUsers"
         app:layout_constraintStart_toEndOf="@+id/helloSticker"
-        app:srcCompat="@drawable/presents" />
+        android:src="@drawable/presents_sticker" />
 
     <ImageView
         android:id="@+id/laughSticker"
@@ -63,14 +63,14 @@
         app:layout_constraintEnd_toStartOf="@+id/burgerSticker"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/helloSticker"
-        app:srcCompat="@drawable/laugh_sticker" />
+        android:src="@drawable/laugh_sticker" />
 
     <ImageView
         android:id="@+id/helloSticker"
         android:layout_width="108dp"
         android:layout_height="124dp"
         android:layout_marginTop="16dp"
-        app:srcCompat="@drawable/hello"
+        android:src="@drawable/hello_sticker"
         android:onClick="sendStickerMessage"
         app:layout_constraintEnd_toStartOf="@+id/presentSticker"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,7 +85,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/laughSticker"
         app:layout_constraintTop_toBottomOf="@+id/presentSticker"
-        app:srcCompat="@drawable/burger_sticker" />
+        android:src="@drawable/burger_sticker" />
 
     <Button
         android:id="@+id/stickersSentButton"

@@ -65,8 +65,8 @@ public class StickersSentActivity extends AppCompatActivity {
                     } else {
                         addHistoryItemToRecyclerView(R.drawable.hello, "Sent " + t.getResult().child("helloStickerCount").getValue() + " times");
                         addHistoryItemToRecyclerView(R.drawable.presents, "Sent " + t.getResult().child("presentStickerCount").getValue() + " times");
-                        addHistoryItemToRecyclerView(R.drawable.laugh_sticker, "Sent " + t.getResult().child("laughStickerCount").getValue() + " times");
-                        addHistoryItemToRecyclerView(R.drawable.burger_sticker, "Sent " + t.getResult().child("burgerStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.laugh, "Sent " + t.getResult().child("laughStickerCount").getValue() + " times");
+                        addHistoryItemToRecyclerView(R.drawable.burger, "Sent " + t.getResult().child("burgerStickerCount").getValue() + " times");
                     }
                 });
             }

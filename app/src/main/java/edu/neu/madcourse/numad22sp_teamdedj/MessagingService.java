@@ -51,7 +51,7 @@ public class MessagingService extends FirebaseMessagingService {
 
         //Bug fixes pending
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification;
         NotificationCompat.Builder builder;

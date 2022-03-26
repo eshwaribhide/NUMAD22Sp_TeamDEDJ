@@ -44,7 +44,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     private String currentUser;
 
-    private static final String SERVER_KEY="key=AAAAP4z9QU0:APA91bECheSrt__KSX5dPa-DfGEfb_fWzgi3_E38lvWsyyHenK9F05Uqfo4bjPXhjKjQCXBt5CgtvpC09PQ4c4oZDaHC8ZLHRTBXveiLzQQ5YWDFg9t3Qfod4AKGVMccnQTzxMaQhFWV";
+    private static final String SERVER_KEY = Credentials.SERVER_KEY.toString();
 
     // For testing purposes, user 2's value
     //private static String CLIENT_REGISTRATION_TOKEN="fCcDoyEjRrGQCrlNj-jCqM:APA91bFMHTOLwz8Bjr585DR65iMaK8p3pjdeKaRdlxJBvgyaOHdQSPhpkcKG27msaTtj1ysW6f64fDXqxRY_qHJiE-qyM_IdTuAIqexmDHpCLEDpGRIQEmXoQna1rwtpk5b3F7pDCOiD";
@@ -66,39 +66,34 @@ public class StickerMessagingActivity extends AppCompatActivity {
             } else {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
-                 //FOR TESTING
-//                mDatabase.child("currentUser").get().addOnCompleteListener(t1 -> {
-//                    if (!t1.isSuccessful()) {
-//                        Log.e("firebase", "Error getting data", t1.getException());
-//                    } else {
-                       // currentUser = String.valueOf(t1.getResult().getValue());
-                        // create the notification channel while currentUser is found
-                        createNotificationChannel();
-                        mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
-                            if (t2.getResult().getValue() == null) {
-                                mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
-                            }
-                            else {
-                                mDatabase.child("users").child(currentUser).child("clientRegistrationToken").setValue(task.getResult());
-                            }
-                            Spinner destUsersDropdown = findViewById(R.id.destUsers);
+                createNotificationChannel();
+                mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
+                    if (t2.getResult().getValue() == null) {
+                        mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                    } else {
+                        mDatabase.child("users").child(currentUser).child("clientRegistrationToken").setValue(task.getResult());
+                    }
+                    Spinner destUsersDropdown = findViewById(R.id.destUsers);
 
-                            // Get all users from the database and add to the dropdown
-                            mDatabase.child("users").get().addOnCompleteListener(t3 -> {
-                                if (!t3.isSuccessful()) {
-                                    Log.e("firebase", "Error getting data", t3.getException());
-                                } else {
-                                    // need to save this when going  back if new users added
-                                    ArrayList<String> destUsers = new ArrayList<>();
-                                    for (DataSnapshot dschild : t3.getResult().getChildren()) {
-                                        destUsers.add(String.valueOf(dschild.getKey()));
-                                    }
-                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, destUsers);
-                                    destUsersDropdown.setAdapter(adapter);
+                    // Get all users from the database and add to the dropdown
+                    mDatabase.child("users").get().addOnCompleteListener(t3 -> {
+                        if (!t3.isSuccessful()) {
+                            Log.e("firebase", "Error getting data", t3.getException());
+                        } else {
+                            // need to save this when going  back if new users added
+                            ArrayList<String> destUsers = new ArrayList<>();
+                            for (DataSnapshot dschild : t3.getResult().getChildren()) {
+                                String dbUser = String.valueOf(dschild.getKey());
+                                if (!dbUser.equals(currentUser)){
+                                    destUsers.add(dbUser);
                                 }
-                            });
+                            }
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, destUsers);
+                            destUsersDropdown.setAdapter(adapter);
+                        }
+                    });
 
-                        });
+                });
 
             }
         });
@@ -113,8 +108,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
     private void initData(Bundle savedInstanceState) {
         if (savedInstanceState != null && savedInstanceState.containsKey("currentUser")) {
             currentUser = savedInstanceState.getString("currentUser");
-        }
-        else {
+        } else {
             Log.e("INITDATA", "INITDATA");
             Bundle b = getIntent().getExtras();
             if (b != null) {
@@ -269,7 +263,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
         }
     }
 
-    public void subscribeToStickerNotifications(){
+    public void subscribeToStickerNotifications() {
         // subscribe to incoming stickers for currentUser
         FirebaseMessaging.getInstance().subscribeToTopic(currentUser)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -287,13 +281,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-            if(resultCode == RESULT_OK && requestCode == 2404) {
-                Bundle b = getIntent().getExtras();
-                if (b != null) {
-                    currentUser = b.getString("currentUser");
-                    finish();
-                    startActivity(getIntent());
-                }
+        if (resultCode == RESULT_OK && requestCode == 2404) {
+            Bundle b = getIntent().getExtras();
+            if (b != null) {
+                currentUser = b.getString("currentUser");
+                finish();
+                startActivity(getIntent());
+            }
         }
     }
 }

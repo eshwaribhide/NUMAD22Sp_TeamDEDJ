@@ -106,23 +106,16 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        Log.e("HERE", "HERE");
-        Log.e("current user", currentUser);
-
         outState.putString("currentUser", currentUser);
-        Log.e("HASKEY", String.valueOf(outState.containsKey("currentUser")));
         super.onSaveInstanceState(outState);
     }
 
     private void initData(Bundle savedInstanceState) {
-        Log.e("INITDATA", "IN FUNCTION");
-        Log.e("SAVEDINSTANCESTATE", String.valueOf(savedInstanceState));
         if (savedInstanceState != null && savedInstanceState.containsKey("currentUser")) {
-            Log.e("GETTINGSTRING", "GETTINGSTRING");
             currentUser = savedInstanceState.getString("currentUser");
         }
         else {
-            //Log.e("CONTAINSKEY", String.valueOf(savedInstanceState.containsKey("currentUser")));
+            Log.e("INITDATA", "INITDATA");
             Bundle b = getIntent().getExtras();
             if (b != null) {
                 currentUser = b.getString("currentUser");
@@ -246,7 +239,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
         Bundle b = new Bundle();
         b.putString("currentUser", currentUser);
         intent.putExtras(b);
-        startActivity(intent);
+        startActivityForResult(intent, 2404);
     }
 
     public void stickersSentButtonOnClick(View view) {
@@ -255,7 +248,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
         Bundle b = new Bundle();
         b.putString("currentUser", currentUser);
         intent.putExtras(b);
-        startActivity(intent);
+        startActivityForResult(intent, 2404);
     }
 
     public void createNotificationChannel() {
@@ -277,7 +270,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        String msg = currentUser + "is subscribed to notifications";
+                        String msg = currentUser + " is subscribed to notifications";
                         if (!task.isSuccessful()) {
                             msg = "Failed to subscribe to " + currentUser + "'s notifications";
                         }
@@ -289,13 +282,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
+            if(resultCode == RESULT_OK && requestCode == 2404) {
                 Bundle b = getIntent().getExtras();
                 if (b != null) {
                     currentUser = b.getString("currentUser");
+                    finish();
+                    startActivity(getIntent());
                 }
-            }
         }
     }
 }

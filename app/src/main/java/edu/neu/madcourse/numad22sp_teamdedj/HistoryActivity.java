@@ -124,7 +124,6 @@ public class HistoryActivity extends AppCompatActivity {
             case android.R.id.home:
                 Bundle b = new Bundle();
                 b.putString("currentUser", currentUser);
-                Log.e("HISTORYCURRENTUSER", currentUser);
                 Intent intent = new Intent();
                 intent.putExtras(b);
                 setResult(RESULT_OK, intent);

@@ -185,10 +185,9 @@ public class StickerMessagingActivity extends AppCompatActivity {
         JSONObject jData = new JSONObject();
         try {
             jNotification.put("title", "Sticker Received");
-            jNotification.put("body", "View Sticker");
+            jNotification.put("body", "New sticker received!");
             jNotification.put("badge", "1");
-            // Just a temporary image for now just to fulfill requirement of "not only text image"
-            jNotification.put("image", "https://i.imgur.com/Or7eeA9.jpg");
+            jNotification.put("image", "https://i.imgur.com/m9xYzXl.png");
 
 
             jData.put("title", "Sticker");
@@ -289,7 +288,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {

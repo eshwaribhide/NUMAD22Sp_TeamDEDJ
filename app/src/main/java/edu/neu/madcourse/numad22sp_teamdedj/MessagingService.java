@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
@@ -62,11 +63,17 @@ public class MessagingService extends FirebaseMessagingService {
         notificationManager.createNotificationChannel(notificationChannel);
         builder = new NotificationCompat.Builder(this, CHANNEL_ID);
 
+        Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(),
+                R.drawable.notification_bell);
+
         notification = builder.setContentTitle(remoteMessageNotification.getNotification().getTitle())
                 .setContentText("New sticker received!")
                 .setSmallIcon(R.mipmap.ic_launcher_dedj_round)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
+                .setLargeIcon(bitmap)
+                .setStyle(new NotificationCompat.BigPictureStyle()
+                        .bigPicture(bitmap))
                 .build();
         notificationManager.notify(0, notification);
     }

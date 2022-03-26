@@ -43,17 +43,25 @@ public class MainActivity extends AppCompatActivity {
         alertDialogBuilder.setView(layout);
         alertDialogBuilder.setPositiveButton("OK", (dialog, whichButton) -> {
             String username = editUsername.getText().toString();
-            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-                if (!task.isSuccessful()) {
-                    Toast toast = Toast.makeText(this, "Cannot get token", Toast.LENGTH_SHORT);
-                    toast.show();
-                } else {
-                    Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
-                    mDatabase = FirebaseDatabase.getInstance().getReference();
-                    mDatabase.child("currentUser").setValue(username);
-                }});
+        //    FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+//                if (!task.isSuccessful()) {
+//                    Toast toast = Toast.makeText(this, "Cannot get token", Toast.LENGTH_SHORT);
+//                    toast.show();
+//                } else {
+//                    Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
+//                    mDatabase = FirebaseDatabase.getInstance().getReference();
+//                    mDatabase.child("currentUser").setValue(username);
+//                }
 
+
+
+
+        //    });
+            // Enclose the currentUser information as a parameter
+            Bundle b = new Bundle();
+            b.putString("currentUser", username);
             Intent intent = new Intent(this, StickerMessagingActivity.class);
+            intent.putExtras(b);
             startActivity(intent);
         });
 

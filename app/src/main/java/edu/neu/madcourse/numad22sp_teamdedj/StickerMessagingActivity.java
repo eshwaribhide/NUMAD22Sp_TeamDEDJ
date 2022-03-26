@@ -35,8 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
-// Current issues
-// 1. foreground notifications do not work and also banner notification does not work for some reason
+// store name of user locally so that can access the token later
 public class StickerMessagingActivity extends AppCompatActivity {
 
     private static final String TAG = "StickerMessagingActivity";
@@ -58,6 +57,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_messaging);
+        initSavedInstanceState(savedInstanceState);
         Log.e("IN ON CREATE", "STICKER MESSAGING");
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
@@ -67,16 +67,19 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 Log.e("CLIENT_REGISTRATION_TOKEN", task.getResult());
                 mDatabase = FirebaseDatabase.getInstance().getReference();
                  //FOR TESTING
-                mDatabase.child("currentUser").get().addOnCompleteListener(t1 -> {
-                    if (!t1.isSuccessful()) {
-                        Log.e("firebase", "Error getting data", t1.getException());
-                    } else {
-                        currentUser = String.valueOf(t1.getResult().getValue());
+//                mDatabase.child("currentUser").get().addOnCompleteListener(t1 -> {
+//                    if (!t1.isSuccessful()) {
+//                        Log.e("firebase", "Error getting data", t1.getException());
+//                    } else {
+                       // currentUser = String.valueOf(t1.getResult().getValue());
                         // create the notification channel while currentUser is found
                         createNotificationChannel();
                         mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
                             if (t2.getResult().getValue() == null) {
                                 mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
+                            }
+                            else {
+                                mDatabase.child("users").child(currentUser).child("clientRegistrationToken").setValue(task.getResult());
                             }
                             Spinner destUsersDropdown = findViewById(R.id.destUsers);
 
@@ -95,13 +98,44 @@ public class StickerMessagingActivity extends AppCompatActivity {
                             });
 
                         });
-                    }});
+
             }
         });
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        Log.e("HERE", "HERE");
+        Log.e("current user", currentUser);
+
+        outState.putString("currentUser", currentUser);
+        Log.e("HASKEY", String.valueOf(outState.containsKey("currentUser")));
+        super.onSaveInstanceState(outState);
+    }
+
+    private void initData(Bundle savedInstanceState) {
+        Log.e("INITDATA", "IN FUNCTION");
+        Log.e("SAVEDINSTANCESTATE", String.valueOf(savedInstanceState));
+        if (savedInstanceState != null && savedInstanceState.containsKey("currentUser")) {
+            Log.e("GETTINGSTRING", "GETTINGSTRING");
+            currentUser = savedInstanceState.getString("currentUser");
+        }
+        else {
+            //Log.e("CONTAINSKEY", String.valueOf(savedInstanceState.containsKey("currentUser")));
+            Bundle b = getIntent().getExtras();
+            if (b != null) {
+                currentUser = b.getString("currentUser");
+            }
+        }
+    }
+
+    private void initSavedInstanceState(Bundle savedInstanceState) {
+        initData(savedInstanceState);
+    }
+
     // send a sticker from the device to the selected user
     public void sendStickerMessage(View view) {
+        Log.e("in sendStickerMessage", "in sendStickerMessage function");
         Spinner destUsersDropdown = findViewById(R.id.destUsers);
         String destUser = destUsersDropdown.getSelectedItem().toString();
         Log.e(TAG, destUser);
@@ -109,6 +143,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());
             } else {
+                Log.e("Before sent sticker", "in sendStickerMessage");
                 // get token of the user from the database
                 String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
 
@@ -117,15 +152,19 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 String countChildValue;
                 if (stickerId == R.id.helloSticker) {
                     sentSticker = R.drawable.hello;
+                    Log.e("Sent sticker", Integer.toString(sentSticker));
                     countChildValue = "helloStickerCount";
                 } else if (stickerId == R.id.presentSticker) {
                     sentSticker = R.drawable.presents;
+                    Log.e("Sent sticker", Integer.toString(sentSticker));
                     countChildValue = "presentStickerCount";
                 } else if (stickerId == R.id.laughSticker) {
                     sentSticker = R.drawable.laugh;
+                    Log.e("Sent sticker", Integer.toString(sentSticker));
                     countChildValue = "laughStickerCount";
                 } else {
                     sentSticker = R.drawable.burger;
+                    Log.e("Sent sticker", Integer.toString(sentSticker));
                     countChildValue = "burgerStickerCount";
                 }
                 new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();
@@ -246,5 +285,17 @@ public class StickerMessagingActivity extends AppCompatActivity {
                         Toast.makeText(StickerMessagingActivity.this, msg, Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                Bundle b = getIntent().getExtras();
+                if (b != null) {
+                    currentUser = b.getString("currentUser");
+                }
+            }
+        }
     }
 }

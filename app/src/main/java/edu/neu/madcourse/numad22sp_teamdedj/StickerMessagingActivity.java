@@ -251,6 +251,11 @@ public class StickerMessagingActivity extends AppCompatActivity {
         startActivityForResult(intent, 2404);
     }
 
+    public void floatingActionButtonOnClick(View view) {
+        finish();
+        startActivity(getIntent());
+    }
+
     public void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String description = getString(R.string.channel_description);

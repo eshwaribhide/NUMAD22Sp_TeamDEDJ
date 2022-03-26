@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
@@ -73,6 +74,11 @@ public class StickersSentActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    public void floatingActionButtonOnClick(View view) {
+        finish();
+        startActivity(getIntent());
     }
 
     private void addHistoryItemToRecyclerView(Integer stickerID, String stickerCount) {

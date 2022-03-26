@@ -88,6 +88,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                                 if (!t3.isSuccessful()) {
                                     Log.e("firebase", "Error getting data", t3.getException());
                                 } else {
+                                    // need to save this when going  back if new users added
                                     ArrayList<String> destUsers = new ArrayList<>();
                                     for (DataSnapshot dschild : t3.getResult().getChildren()) {
                                         destUsers.add(String.valueOf(dschild.getKey()));
@@ -196,7 +197,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             jData.put("content", sentSticker);
 
             // /topics/user will be the topic to subscribe to for currentUser
-            jPayload.put("to", "/topics/" + destUser);
+            jPayload.put("to", targetToken);
 
             jPayload.put("priority", "high");
             jPayload.put("notification", jNotification);
@@ -288,6 +289,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {

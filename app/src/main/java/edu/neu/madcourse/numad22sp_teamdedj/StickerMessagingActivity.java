@@ -91,7 +91,10 @@ public class StickerMessagingActivity extends AppCompatActivity {
                                     // need to save this when going  back if new users added
                                     ArrayList<String> destUsers = new ArrayList<>();
                                     for (DataSnapshot dschild : t3.getResult().getChildren()) {
-                                        destUsers.add(String.valueOf(dschild.getKey()));
+                                        String dbUser = String.valueOf(dschild.getKey());
+                                        if (!dbUser.equals(currentUser)) {
+                                            destUsers.add(dbUser);
+                                        }
                                     }
                                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, destUsers);
                                     destUsersDropdown.setAdapter(adapter);

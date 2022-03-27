@@ -68,11 +68,13 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 mDatabase = FirebaseDatabase.getInstance().getReference();
                 createNotificationChannel();
                 mDatabase.child("users").child(currentUser).get().addOnCompleteListener(t2 -> {
+
                     if (t2.getResult().getValue() == null) {
                         mDatabase.child("users").child(currentUser).setValue(new User(currentUser, task.getResult()));
                     } else {
                         mDatabase.child("users").child(currentUser).child("clientRegistrationToken").setValue(task.getResult());
                     }
+
                     Spinner destUsersDropdown = findViewById(R.id.destUsers);
 
                     // Get all users from the database and add to the dropdown
@@ -123,44 +125,49 @@ public class StickerMessagingActivity extends AppCompatActivity {
 
     // send a sticker from the device to the selected user
     public void sendStickerMessage(View view) {
-        Log.e("in sendStickerMessage", "in sendStickerMessage function");
+        //Log.e("in sendStickerMessage", "in sendStickerMessage function");
         Spinner destUsersDropdown = findViewById(R.id.destUsers);
         String destUser = destUsersDropdown.getSelectedItem().toString();
-        Log.e(TAG, destUser);
-        mDatabase.child("users").child(destUser).get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e("firebase", "Error getting data", task.getException());
-            } else {
-                Log.e("Before sent sticker", "in sendStickerMessage");
-                // get token of the user from the database
-                String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
-
-                int stickerId = view.getId();
-                int sentSticker;
-                String countChildValue;
-                if (stickerId == R.id.helloSticker) {
-                    sentSticker = R.drawable.hello;
-                    Log.e("Sent sticker", Integer.toString(sentSticker));
-                    countChildValue = "helloStickerCount";
-                } else if (stickerId == R.id.presentSticker) {
-                    sentSticker = R.drawable.presents;
-                    Log.e("Sent sticker", Integer.toString(sentSticker));
-                    countChildValue = "presentStickerCount";
-                } else if (stickerId == R.id.laughSticker) {
-                    sentSticker = R.drawable.laugh;
-                    Log.e("Sent sticker", Integer.toString(sentSticker));
-                    countChildValue = "laughStickerCount";
+        //Log.e(TAG, destUser);
+        try{
+            mDatabase.child("users").child(destUser).get().addOnCompleteListener(task -> {
+                if (!task.isSuccessful()) {
+                    Log.e("firebase", "Error getting data", task.getException());
                 } else {
-                    sentSticker = R.drawable.burger;
-                    Log.e("Sent sticker", Integer.toString(sentSticker));
-                    countChildValue = "burgerStickerCount";
-                }
-                new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();
-                // update number of stickers sent by this user
-                StickerMessagingActivity.this.updateStickersSent(countChildValue);
+                    Log.e("Before sent sticker", "in sendStickerMessage");
+                    // get token of the user from the database
+                    String clientRegistrationToken = String.valueOf(task.getResult().child("clientRegistrationToken").getValue());
 
-            }
-        });
+                    int stickerId = view.getId();
+                    int sentSticker;
+                    String countChildValue;
+                    if (stickerId == R.id.helloSticker) {
+                        sentSticker = R.drawable.hello;
+                        Log.e("Sent sticker", Integer.toString(sentSticker));
+                        countChildValue = "helloStickerCount";
+                    } else if (stickerId == R.id.presentSticker) {
+                        sentSticker = R.drawable.presents;
+                        Log.e("Sent sticker", Integer.toString(sentSticker));
+                        countChildValue = "presentStickerCount";
+                    } else if (stickerId == R.id.laughSticker) {
+                        sentSticker = R.drawable.laugh;
+                        Log.e("Sent sticker", Integer.toString(sentSticker));
+                        countChildValue = "laughStickerCount";
+                    } else {
+                        sentSticker = R.drawable.burger;
+                        Log.e("Sent sticker", Integer.toString(sentSticker));
+                        countChildValue = "burgerStickerCount";
+                    }
+                    new Thread(() -> sendStickerMessage(destUser, clientRegistrationToken, sentSticker)).start();
+                    // update number of stickers sent by this user
+                    StickerMessagingActivity.this.updateStickersSent(countChildValue);
+
+                }
+            });
+        }catch(Exception e){
+            Log.e(TAG, "exception caught in send sticker message");
+        }
+
     }
 
     private void sendStickerMessage(String destUser, String targetToken, int sentSticker) {
@@ -193,7 +200,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        String resp = "NULL";
+
         try {
             URL url = new URL("https://fcm.googleapis.com/fcm/send");
             HttpURLConnection req = (HttpURLConnection) url.openConnection();
@@ -205,9 +212,6 @@ public class StickerMessagingActivity extends AppCompatActivity {
             OutputStream outputStream = req.getOutputStream();
             outputStream.write(jPayload.toString().getBytes());
             outputStream.close();
-
-            Scanner s = new Scanner(req.getInputStream()).useDelimiter("\\A");
-            resp = s.hasNext() ? s.next() : "";
 
         } catch (IOException e) {
             Log.e(TAG, "IO Exception in sending message");
@@ -269,7 +273,7 @@ public class StickerMessagingActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        String msg = currentUser + " is subscribed to notifications";
+                        String msg = "You are subscribed to notifications";
                         if (!task.isSuccessful()) {
                             msg = "Failed to subscribe to " + currentUser + "'s notifications";
                         }
